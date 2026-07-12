@@ -221,6 +221,12 @@ if(rows)rows.forEach(function(r){var el=document.getElementById('cfg-'+r.key);if
 }).catch(function(){});
 }
 
+/* প্রকাশিত আর্টিকেল সংখ্যা — queue.json থেকে অটো */
+fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
+var n=bn(q.filter(function(x){return x.status==='published';}).length);
+document.querySelectorAll('#ov-tiles .stat-tile').forEach(function(t){
+if(t.textContent.indexOf('প্রকাশিত আর্টিকেল')>-1)t.querySelector('.num').textContent=n;});}).catch(function(){});
+
 /* SEO health check */
 function seoHealth(){
 var t=document.getElementById('seo-health');t.innerHTML='<tr><th>চেক</th><th>ফলাফল</th></tr>';

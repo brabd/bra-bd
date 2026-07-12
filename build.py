@@ -25,6 +25,8 @@ ARTICLES = [a for a in ALL_ARTICLES if a.get('publishAt', '') <= TODAY]
 SCHEDULED = [a for a in ALL_ARTICLES if a.get('publishAt', '') > TODAY]
 
 def by_cat(c): return [a for a in ARTICLES if a['cat']==c]
+BN='০১২৩৪৫৬৭৮৯'
+def bn(n): return ''.join(BN[int(d)] for d in str(n))
 
 GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet">'
 
@@ -116,7 +118,7 @@ for s,c in CATS.items():
     write(f'/{s}/', html)
 
 # ---------- homepage ----------
-cat_cards = ''.join(f'''<a href="/{s}/" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 22px;text-decoration:none;display:block"><div style="width:52px;height:52px;border-radius:12px;background:var(--teal-lite);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px">{c['emoji']}</div><h3 style="font-family:var(--font-head);font-size:18px;color:var(--text-main);margin-bottom:8px">{c['name']}</h3><p style="font-size:13px;color:var(--text-mute);line-height:1.75;margin-bottom:12px">{c['desc']}</p><span style="font-size:12px;color:var(--teal);font-weight:600">৩টি আর্টিকেল →</span></a>''' for s,c in CATS.items())
+cat_cards = ''.join(f'''<a href="/{s}/" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 22px;text-decoration:none;display:block"><div style="width:52px;height:52px;border-radius:12px;background:var(--teal-lite);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px">{c['emoji']}</div><h3 style="font-family:var(--font-head);font-size:18px;color:var(--text-main);margin-bottom:8px">{c['name']}</h3><p style="font-size:13px;color:var(--text-mute);line-height:1.75;margin-bottom:12px">{c['desc']}</p><span style="font-size:12px;color:var(--teal);font-weight:600">{bn(len(by_cat(s)))}টি আর্টিকেল →</span></a>''' for s,c in CATS.items())
 feat = ''.join(f'''<a href="/{a['cat']}/{a['slug']}/" class="cat-img-card"><div class="cat-img-card-img"><img src="/images/articles/{a['cat']}/{a['slug']}.jpg" alt="{a['alt']}" loading="lazy" onerror="this.style.display='none'"></div><div class="cat-img-card-body"><div class="cat-img-card-meta"><span class="cat-img-card-tag">{CATS[a['cat']]['name']}</span><span class="cat-img-card-time">{a['minutes']} মিনিট</span></div><div class="cat-img-card-title">{a['title']}</div><p class="cat-img-card-excerpt">{a['excerpt'][:110]}…</p></div></a>''' for a in ARTICLES[:6])
 home_faq = [
  ('আমার সঠিক ব্রা সাইজ কীভাবে জানবো?','একটি মাপার ফিতা দিয়ে বাসায়ই ব্যান্ড ও বাস্ট মেপে সাইজ বের করা যায়। আমাদের সাইজ মাপার গাইডে ধাপে ধাপে পদ্ধতি দেওয়া আছে।'),
@@ -140,8 +142,8 @@ html = (head(f'{SITE} — ব্রা সাইজ, ফিটিং ও যত�
 <a href="/about/" style="background:rgba(255,255,255,.12);color:white;padding:12px 26px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid rgba(255,255,255,.3)">আমাদের সম্পর্কে</a>
 </div></div></div>
 <div style="background:var(--white);border-bottom:1px solid var(--border)"><div style="max-width:1100px;margin:0 auto;padding:20px 24px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--text-mute)">
-<div><strong style="color:var(--teal);font-size:20px">১২+</strong> বিস্তারিত গাইড</div>
-<div><strong style="color:var(--teal);font-size:20px">৪টি</strong> বিষয়ভিত্তিক বিভাগ</div>
+<div><strong style="color:var(--teal);font-size:20px">{bn(len(ARTICLES))}+</strong> বিস্তারিত গাইড</div>
+<div><strong style="color:var(--teal);font-size:20px">{bn(len(CATS))}টি</strong> বিষয়ভিত্তিক বিভাগ</div>
 <div><strong style="color:var(--teal);font-size:20px">১০০%</strong> বাংলায়</div>
 <div><strong style="color:var(--teal);font-size:20px">{YEAR}</strong> হালনাগাদ তথ্য</div>
 </div></div>
