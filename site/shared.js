@@ -36,6 +36,13 @@
     }
   });
 
+  /* Supabase থেকে সাইট কনফিগ সিঙ্ক (পরের পেজলোডে কার্যকর হয়) */
+  try{
+    if(window.BB_SB){BB_SB.get('site_config?select=key,value').then(function(rows){
+      if(rows&&rows.length){var c={};rows.forEach(function(r){c[r.key]=r.value;});
+      localStorage.setItem('bb_site_config',JSON.stringify(c));}}).catch(function(){});}
+  }catch(e){}
+
   /* এডমিন প্যানেল থেকে সেট করা ভেরিফিকেশন মেটা ও GA ইনজেকশন */
   try{
     var cfg=JSON.parse(localStorage.getItem('bb_site_config')||'{}');
@@ -67,5 +74,8 @@
     var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
     Object.keys(stats).forEach(function(k){if(new Date(k)<cutoff)delete stats[k];});
     localStorage.setItem('bb_stats',JSON.stringify(stats));
+    if(window.BB_SB&&location.pathname.indexOf('/admin')!==0){
+      BB_SB.insert('visits',{path:location.pathname,source:src}).catch(function(){});
+    }
   }catch(e){}
 })();

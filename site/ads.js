@@ -8,10 +8,15 @@
     footer:{enabled:true,type:'dummy',html:'',label:'ফুটার ব্যানার'}
   };
   function getAds(){try{var a=JSON.parse(localStorage.getItem('bb_ads')||'null');return a||DEFAULT_ADS;}catch(e){return DEFAULT_ADS;}}
+  /* Supabase থেকে অ্যাড কনফিগ সিঙ্ক */
+  try{if(window.BB_SB){BB_SB.get('ads?select=slot,enabled,type,html').then(function(rows){
+    if(rows&&rows.length){var a={};rows.forEach(function(r){a[r.slot]={enabled:r.enabled,type:r.type,html:r.html,label:(DEFAULT_ADS[r.slot]||{}).label};});
+    localStorage.setItem('bb_ads',JSON.stringify(a));}}).catch(function(){});}}catch(e){}
   function track(slot,kind){
     try{var t=JSON.parse(localStorage.getItem('bb_ad_stats')||'{}');
     t[slot]=t[slot]||{views:0,clicks:0};t[slot][kind]++;
     localStorage.setItem('bb_ad_stats',JSON.stringify(t));}catch(e){}
+    try{if(window.BB_SB)BB_SB.insert('ad_events',{slot:slot,kind:kind==='views'?'view':'click'}).catch(function(){});}catch(e){}
   }
   document.addEventListener('DOMContentLoaded',function(){
     var ads=getAds();

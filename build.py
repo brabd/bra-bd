@@ -56,7 +56,7 @@ def footer():
     f'<span>&copy; {YEAR} bra.bd — সর্বস্বত্ব সংরক্ষিত</span>'
     '<div class="footer-bottom-links"><a href="/privacy-policy/">প্রাইভেসি</a><a href="/terms-of-service/">শর্তাবলী</a>'
     '<a href="/disclaimer/">দাবিত্যাগ</a><a href="/contact/">যোগাযোগ</a><a href="/sitemap.xml">সাইটম্যাপ</a></div>'
-    '</div></footer>\n<script src="/shared.js"></script>\n<script src="/ads.js"></script>\n</body>\n</html>')
+    '</div></footer>\n<script src="/sb.js"></script>\n<script src="/shared.js"></script>\n<script src="/ads.js"></script>\n</body>\n</html>')
 
 def write(path, html):
     p = os.path.join(ROOT, path.strip('/').replace('/', os.sep), 'index.html') if path!='/' else os.path.join(ROOT,'index.html')

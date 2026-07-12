@@ -78,6 +78,7 @@ th{color:var(--text-mute);font-size:12px}
 <p class="note">নতুন আর্টিকেল যোগ হয় গিটহাব রিপোতে (content/ ফোল্ডারে বডি + manifest.json এন্ট্রি + build.py চালানো)। অটোমেটেড কনটেন্ট পাইপলাইন সেটআপ করা হলে এখানে শিডিউলও দেখা যাবে।</p></div>
 </div>
 </div>
+<script src="/sb.js"></script>
 <script>
 var BN=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];function bn(n){return String(n).replace(/\d/g,function(d){return BN[+d];});}
 document.querySelectorAll('.adm-tab').forEach(function(t){t.onclick=function(){
@@ -123,14 +124,56 @@ sl.innerHTML+='<div style="border:1px solid var(--border);border-radius:8px;padd
 '<b>'+LBL[s]+'</b> <label style="display:inline;margin-left:12px;font-weight:400"><input type="checkbox" id="en-'+s+'" '+(a.enabled?'checked':'')+'> চালু</label>'+
 '<label>টাইপ</label><select id="ty-'+s+'"><option value="dummy"'+(a.type==='dummy'?' selected':'')+'>ডামি (প্লেসহোল্ডার)</option><option value="custom"'+(a.type==='custom'?' selected':'')+'>কাস্টম HTML</option><option value="adsense"'+(a.type==='adsense'?' selected':'')+'>AdSense</option></select>'+
 '<label>কাস্টম HTML (টাইপ কাস্টম হলে)</label><textarea id="ht-'+s+'" rows="2">'+(a.html||'')+'</textarea></div>';});
-function saveAds(){var out={};SLOTS.forEach(function(s){out[s]={enabled:document.getElementById('en-'+s).checked,type:document.getElementById('ty-'+s).value,html:document.getElementById('ht-'+s).value,label:LBL[s]};});
-localStorage.setItem('bb_ads',JSON.stringify(out));document.getElementById('ads-ok').style.display='block';}
+function saveAds(){var out={},rows=[];SLOTS.forEach(function(s){var o={enabled:document.getElementById('en-'+s).checked,type:document.getElementById('ty-'+s).value,html:document.getElementById('ht-'+s).value};out[s]=Object.assign({label:LBL[s]},o);rows.push(Object.assign({slot:s},o));});
+localStorage.setItem('bb_ads',JSON.stringify(out));
+if(window.BB_SB)BB_SB.upsert('ads',rows).catch(function(e){alert('Supabase সিঙ্ক ব্যর্থ: '+e);});
+document.getElementById('ads-ok').style.display='block';}
 
 /* seo config */
 var cfg=JSON.parse(localStorage.getItem('bb_site_config')||'{}');
 ['adsense','ga','gsc','bing'].forEach(function(k){document.getElementById('cfg-'+k).value=cfg[k]||'';});
-function saveCfg(){var c={};['adsense','ga','gsc','bing'].forEach(function(k){c[k]=document.getElementById('cfg-'+k).value.trim();});
-localStorage.setItem('bb_site_config',JSON.stringify(c));document.getElementById('cfg-ok').style.display='block';}
+function saveCfg(){var c={},rows=[];['adsense','ga','gsc','bing'].forEach(function(k){c[k]=document.getElementById('cfg-'+k).value.trim();rows.push({key:k,value:c[k]});});
+localStorage.setItem('bb_site_config',JSON.stringify(c));
+if(window.BB_SB)BB_SB.upsert('site_config',rows).catch(function(e){alert('Supabase সিঙ্ক ব্যর্থ: '+e);});
+document.getElementById('cfg-ok').style.display='block';}
+
+/* Supabase কেন্দ্রীয় পরিসংখ্যান — থাকলে লোকাল ডেটার বদলে দেখাও */
+if(window.BB_SB){
+BB_SB.get('visits?select=day,path,source&order=day.desc&limit=10000').then(function(rows){
+if(!rows||!rows.length)return;
+var tv=rows.length,s2={},p2={},d2={};
+rows.forEach(function(r){s2[r.source]=(s2[r.source]||0)+1;p2[r.path]=(p2[r.path]||0)+1;d2[r.day]=(d2[r.day]||0)+1;});
+var today2=new Date().toISOString().slice(0,10);
+document.getElementById('ov-tiles').innerHTML=
+'<div class="stat-tile"><div class="num">'+bn(tv)+'</div><div class="lbl">মোট পেজভিউ (সব ভিজিটর)</div></div>'+
+'<div class="stat-tile"><div class="num">'+bn(d2[today2]||0)+'</div><div class="lbl">আজকের ভিউ</div></div>'+
+'<div class="stat-tile"><div class="num">'+bn(Object.keys(d2).length)+'</div><div class="lbl">সক্রিয় দিন</div></div>'+
+'<div class="stat-tile"><div class="num">১২</div><div class="lbl">প্রকাশিত আর্টিকেল</div></div>';
+var st2=document.getElementById('ov-sources');st2.innerHTML='<tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr>';
+var mx=Math.max.apply(null,Object.values(s2));
+Object.keys(s2).sort(function(a,b){return s2[b]-s2[a];}).forEach(function(s){st2.innerHTML+='<tr><td>'+s+'</td><td>'+bn(s2[s])+'</td><td style="width:40%"><div class="bar" style="width:'+(s2[s]/mx*100)+'%"></div></td></tr>';});
+var pt2=document.getElementById('ov-pages');pt2.innerHTML='<tr><th>পেজ</th><th>ভিউ</th></tr>';
+Object.keys(p2).sort(function(a,b){return p2[b]-p2[a];}).slice(0,10).forEach(function(p){pt2.innerHTML+='<tr><td>'+p+'</td><td>'+bn(p2[p])+'</td></tr>';});
+var dd2=document.getElementById('ov-daily');dd2.innerHTML='';
+var l14=[];for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);l14.push([k,d2[k]||0]);}
+var mD=Math.max.apply(null,l14.map(function(x){return x[1];}).concat([1]));
+l14.forEach(function(x){dd2.innerHTML+='<div title="'+x[0]+': '+x[1]+'" style="flex:1;background:var(--teal-lite2);border-radius:3px;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:3px;height:'+(x[1]/mD*100)+'%"></div></div>';});
+}).catch(function(){});
+BB_SB.get('ad_events?select=slot,kind&limit=10000').then(function(rows){
+if(!rows||!rows.length)return;
+var t2={};rows.forEach(function(r){t2[r.slot]=t2[r.slot]||{view:0,click:0};t2[r.slot][r.kind]++;});
+var ast2=document.getElementById('ad-stats');ast2.innerHTML='<tr><th>স্লট</th><th>ভিউ</th><th>ক্লিক</th><th>CTR</th></tr>';
+SLOTS.forEach(function(s){var d=t2[s]||{view:0,click:0};var ctr=d.view?(d.click/d.view*100).toFixed(1):'0.0';
+ast2.innerHTML+='<tr><td>'+LBL[s]+'</td><td>'+bn(d.view)+'</td><td>'+bn(d.click)+'</td><td>'+bn(ctr)+'%</td></tr>';});
+}).catch(function(){});
+BB_SB.get('ads?select=slot,enabled,type,html').then(function(rows){
+if(!rows)return;rows.forEach(function(r){var en=document.getElementById('en-'+r.slot),ty=document.getElementById('ty-'+r.slot),ht=document.getElementById('ht-'+r.slot);
+if(en){en.checked=r.enabled;ty.value=r.type;ht.value=r.html||'';}});
+}).catch(function(){});
+BB_SB.get('site_config?select=key,value').then(function(rows){
+if(rows)rows.forEach(function(r){var el=document.getElementById('cfg-'+r.key);if(el&&r.value)el.value=r.value;});
+}).catch(function(){});
+}
 
 /* content list */
 fetch('/sitemap.xml').then(function(r){return r.text();}).then(function(x){
