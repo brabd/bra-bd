@@ -78,8 +78,23 @@ th{color:var(--text-mute);font-size:12px}
 <p class="note">নতুন আর্টিকেল যোগ হয় গিটহাব রিপোতে (content/ ফোল্ডারে বডি + manifest.json এন্ট্রি + build.py চালানো)। অটোমেটেড কনটেন্ট পাইপলাইন সেটআপ করা হলে এখানে শিডিউলও দেখা যাবে।</p></div>
 </div>
 </div>
+<div id="login-gate" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:1000;align-items:center;justify-content:center">
+<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:36px;max-width:360px;width:90%;text-align:center">
+<div style="font-size:34px;margin-bottom:10px">🔒</div>
+<h3 style="color:var(--text-main);margin-bottom:16px">এডমিন লগইন</h3>
+<input type="password" id="adm-pass" placeholder="পাসওয়ার্ড" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:15px;margin-bottom:12px" onkeydown="if(event.key==='Enter')checkPass()">
+<button class="btn" style="width:100%;margin-top:0" onclick="checkPass()">প্রবেশ করুন</button>
+<p id="adm-err" style="color:#c0392b;font-size:13px;margin-top:10px;display:none">ভুল পাসওয়ার্ড</p>
+</div></div>
 <script src="/sb.js"></script>
 <script>
+/* --- পাসওয়ার্ড গেট (SHA-256) --- */
+var ADM_HASH='c2f484b0589db596f6de3ee4eadca65844121e12a8bd4643545eedb507551551';
+function sha256(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return[...new Uint8Array(b)].map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}
+function checkPass(){sha256(document.getElementById('adm-pass').value).then(function(h){
+if(h===ADM_HASH){sessionStorage.setItem('bb_adm','1');document.getElementById('login-gate').style.display='none';}
+else document.getElementById('adm-err').style.display='block';});}
+if(sessionStorage.getItem('bb_adm')!=='1'){document.getElementById('login-gate').style.display='flex';}
 var BN=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];function bn(n){return String(n).replace(/\d/g,function(d){return BN[+d];});}
 document.querySelectorAll('.adm-tab').forEach(function(t){t.onclick=function(){
 document.querySelectorAll('.adm-tab').forEach(function(x){x.classList.remove('active');});
