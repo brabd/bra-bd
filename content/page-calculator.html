@@ -1,0 +1,76 @@
+<p class="article-intro">মাত্র দুটি মাপ দিন — বাকিটা আমরা হিসাব করে দেবো। মাপ নেওয়ার নিয়ম না জানলে আগে দেখুন <a href="/size-fitting/bra-size-measurement-guide/">সাইজ মাপার গাইড</a> (২ মিনিট)।</p>
+
+<div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:28px;margin:24px 0">
+  <div style="display:flex;gap:10px;margin-bottom:20px">
+    <button type="button" id="u-in" onclick="setUnit('in')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--teal);background:var(--teal);color:white;font-family:var(--font-body);font-weight:600;cursor:pointer">ইঞ্চি</button>
+    <button type="button" id="u-cm" onclick="setUnit('cm')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:white;color:var(--text-mute);font-family:var(--font-body);font-weight:600;cursor:pointer">সেন্টিমিটার</button>
+  </div>
+  <label style="display:block;font-weight:600;color:var(--text-main);margin-bottom:6px">১. আন্ডারবাস্ট মাপ (বুকের ঠিক নিচে) <span id="l1">— ইঞ্চিতে</span></label>
+  <input type="number" id="in-under" min="20" max="150" step="0.5" placeholder="যেমন: 32" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:16px;font-family:var(--font-body);margin-bottom:18px">
+  <label style="display:block;font-weight:600;color:var(--text-main);margin-bottom:6px">২. বাস্ট মাপ (স্তনের সবচেয়ে ভরাট জায়গায়) <span id="l2">— ইঞ্চিতে</span></label>
+  <input type="number" id="in-bust" min="20" max="160" step="0.5" placeholder="যেমন: 35" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:16px;font-family:var(--font-body);margin-bottom:22px">
+  <button type="button" onclick="calcSize()" style="width:100%;background:var(--amber);color:white;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:16px;cursor:pointer;font-family:var(--font-body)">আমার সাইজ বের করুন 🎀</button>
+  <p id="calc-err" style="color:#c0392b;font-size:14px;margin-top:12px;display:none"></p>
+</div>
+
+<div id="calc-result" style="display:none;background:linear-gradient(135deg,var(--teal-dark),var(--teal));border-radius:14px;padding:32px;margin:24px 0;text-align:center;color:white">
+  <p style="font-size:14px;opacity:.8;margin-bottom:6px">আপনার আনুমানিক ব্রা সাইজ</p>
+  <div id="res-size" style="font-size:52px;font-weight:700;font-family:var(--font-head);margin-bottom:14px"></div>
+  <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;margin-top:10px">
+    <p style="font-size:13px;opacity:.85;margin-bottom:6px">সিস্টার সাইজ (এই সাইজ না পেলে বা ফিট না হলে ট্রাই করুন)</p>
+    <div id="res-sister" style="font-size:18px;font-weight:600"></div>
+  </div>
+  <p id="res-note" style="font-size:13px;opacity:.85;margin-top:14px;line-height:1.8"></p>
+</div>
+
+<div class="article-content">
+<div class="warn-box"><div class="warn-box-label">⚠️ মনে রাখুন</div><p>এটি একটি আনুমানিক হিসাব — ব্র্যান্ড ও কাটভেদে ফিটিং ভিন্ন হয়। ফলাফলকে শুরুর পয়েন্ট ধরুন এবং কেনার সময় <a href="/size-fitting/wrong-bra-size-signs/">ফিটিং চেকলিস্ট</a> মিলিয়ে নিন।</p></div>
+<h2>ক্যালকুলেটর যেভাবে হিসাব করে</h2>
+<p>আন্ডারবাস্ট মাপকে কাছের জোড় সংখ্যায় নিয়ে সেটি হয় আপনার <strong>ব্যান্ড সাইজ</strong>। বাস্ট থেকে ব্যান্ড বিয়োগ করে যত ইঞ্চি পার্থক্য, তত ধাপ <strong>কাপ</strong>: ১"=A, ২"=B, ৩"=C, ৪"=D, ৫"=DD/E। বিস্তারিত: <a href="/size-fitting/cup-size-band-size-explained/">কাপ ও ব্যান্ড সাইজের ব্যাখ্যা</a>।</p>
+<div class="tip-box"><div class="tip-box-label">💡 টিপস</div><p>মাসিক শেষ হওয়ার ৩–৪ দিন পর, পাতলা বা প্যাডবিহীন ব্রা পরে মাপ নিলে সবচেয়ে নির্ভুল ফল পাবেন।</p></div>
+</div>
+
+<div class="ad-slot" data-ad-slot="inArticle1"></div>
+
+<div class="faq-section"><h2>সাধারণ জিজ্ঞাসা</h2>
+<div class="faq-item"><div class="faq-q">মাপ বিজোড় সংখ্যা হলে কী হবে?<span class="faq-icon">+</span></div><div class="faq-a"><p>ক্যালকুলেটর কাছের জোড় ব্যান্ডে হিসাব করে এবং সিস্টার সাইজও দেখায় — দুটোই ট্রাই করে যেটা আরামে টাইট বসে সেটি নিন।</p></div></div>
+<div class="faq-item"><div class="faq-q">সেন্টিমিটারে মাপলে কি ফল ভিন্ন হবে?<span class="faq-icon">+</span></div><div class="faq-a"><p>না, আমরা সেন্টিমিটারকে ইঞ্চিতে রূপান্তর করে একই আন্তর্জাতিক পদ্ধতিতে হিসাব করি।</p></div></div>
+<div class="faq-item"><div class="faq-q">ফলাফলের সাইজ দোকানে পাওয়া যাচ্ছে না, কী করবো?<span class="faq-icon">+</span></div><div class="faq-a"><p>সিস্টার সাইজ ট্রাই করুন — ব্যান্ড এক ধাপ বাড়িয়ে কাপ এক ধাপ কমান (বা উল্টো)। কাপ ভলিউম প্রায় একই থাকবে।</p></div></div>
+</div>
+
+<script>
+(function(){window.BB_UNIT='in';})();
+var BNC=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+function bnc(n){return String(n).replace(/\d/g,function(d){return BNC[+d];});}
+function setUnit(u){window.BB_UNIT=u;
+  var i=document.getElementById('u-in'),c=document.getElementById('u-cm');
+  var on='2px solid var(--teal)',off='2px solid var(--border)';
+  i.style.border=u==='in'?on:off;i.style.background=u==='in'?'var(--teal)':'white';i.style.color=u==='in'?'white':'var(--text-mute)';
+  c.style.border=u==='cm'?on:off;c.style.background=u==='cm'?'var(--teal)':'white';c.style.color=u==='cm'?'white':'var(--text-mute)';
+  document.getElementById('l1').textContent=u==='in'?'— ইঞ্চিতে':'— সেন্টিমিটারে';
+  document.getElementById('l2').textContent=u==='in'?'— ইঞ্চিতে':'— সেন্টিমিটারে';
+  document.getElementById('in-under').placeholder=u==='in'?'যেমন: 32':'যেমন: 81';
+  document.getElementById('in-bust').placeholder=u==='in'?'যেমন: 35':'যেমন: 89';
+}
+var CUPS=['AA','A','B','C','D','DD/E','F','G'];
+function calcSize(){
+  var err=document.getElementById('calc-err'),res=document.getElementById('calc-result');
+  err.style.display='none';res.style.display='none';
+  var u=parseFloat(document.getElementById('in-under').value),b=parseFloat(document.getElementById('in-bust').value);
+  if(!u||!b){err.textContent='দুটি মাপই দিন।';err.style.display='block';return;}
+  if(window.BB_UNIT==='cm'){u=u/2.54;b=b/2.54;}
+  if(u<24||u>60||b<24||b>70){err.textContent='মাপটা ঠিক আছে তো? আবার দেখে দিন — ইউনিট (ইঞ্চি/সেমি) ঠিক আছে কি না খেয়াল করুন।';err.style.display='block';return;}
+  if(b<=u){err.textContent='বাস্ট মাপ আন্ডারবাস্টের চেয়ে বড় হওয়ার কথা — মাপ দুটি আবার নিন।';err.style.display='block';return;}
+  var band=Math.round(u/2)*2;
+  var diff=Math.round(b-band);
+  if(diff<1)diff=1;if(diff>8)diff=8;
+  var cup=CUPS[diff-1];
+  document.getElementById('res-size').textContent=bnc(band)+cup;
+  var sis=[];
+  if(diff-1>=1)sis.push(bnc(band+2)+CUPS[diff-2]);
+  if(diff+1<=8)sis.push(bnc(band-2)+CUPS[diff]);
+  document.getElementById('res-sister').textContent=sis.join('  ·  ')||'—';
+  document.getElementById('res-note').textContent='আন্তর্জাতিক (US/UK) সাইজ পদ্ধতিতে হিসাবকৃত। দোকানে কেনার আগে অবশ্যই পরে দেখুন — ব্যান্ড আরামে টাইট আর কাপ উপচে না পড়লেই সাইজ ঠিক।';
+  res.style.display='block';res.scrollIntoView({behavior:'smooth',block:'center'});
+}
+</script>

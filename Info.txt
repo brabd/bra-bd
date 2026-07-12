@@ -1,2 +1,9 @@
 Pexels: IGUNbIfmJROBXikVXNGjOa98NEsriqoa9OgPDCaqEkQ6gZwcI9uvlRUU
 Your API key: 56660476-d334ca03b607fd3600247e67e
+
+
+Supabase Publishable Key: sb_publishable_BpTy9z9Q4I6fhDpeLY6amg_aPZoRgAo
+
+
+https://bra.bd/admin
+Password: BraBD@2026

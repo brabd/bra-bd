@@ -39,7 +39,7 @@ def nav(active=''):
     links = ''.join(f'<a href="/{s}/"{" class=\"active\"" if s==active else ""}>{c["name"]}</a>' for s,c in CATS.items())
     return ('<header><div class="nav-inner"><a href="/" class="logo"><div class="logo-paw">🎀</div>' + SITE + '</a>'
     '<button class="hamburger" id="hamburger" aria-label="মেনু"><span></span><span></span><span></span></button>'
-    f'<nav id="main-nav">{links}<a href="/about/">আমাদের সম্পর্কে</a></nav></div></header>\n'
+    f'<nav id="main-nav">{links}<a href="/calculator/"{" class=\"active\"" if active=="calculator" else ""}>🧮 সাইজ ক্যালকুলেটর</a><a href="/about/">আমাদের সম্পর্কে</a></nav></div></header>\n'
     '<div class="ad-slot" data-ad-slot="header"></div>\n')
 
 def footer():
@@ -152,6 +152,7 @@ write('/', html)
 
 # ---------- static pages from content files ----------
 for slug,title,desc in [
+ ('calculator','ব্রা সাইজ ক্যালকুলেটর','মাত্র দুটি মাপ দিন — আন্ডারবাস্ট ও বাস্ট (ইঞ্চি বা সেন্টিমিটারে)। সাথে সাথে পাবেন আপনার ব্রা সাইজ এবং সিস্টার সাইজ। সম্পূর্ণ ফ্রি, বাংলায়।'),
  ('about','আমাদের সম্পর্কে','ব্রা বাংলাদেশ কেন তৈরি হয়েছে, কারা লিখছেন এবং আমাদের সম্পাদকীয় মান সম্পর্কে জানুন।'),
  ('contact','যোগাযোগ','ব্রা বাংলাদেশ টিমের সাথে যোগাযোগ করুন — প্রশ্ন, পরামর্শ বা ভুল সংশোধনের জন্য।'),
  ('privacy-policy','প্রাইভেসি পলিসি','ব্রা বাংলাদেশ কীভাবে আপনার তথ্য সংগ্রহ ও ব্যবহার করে — কুকিজ, অ্যানালিটিক্স ও বিজ্ঞাপন নীতি।'),
@@ -163,7 +164,7 @@ for slug,title,desc in [
 # ---------- sitemap & robots ----------
 urls = [('/','weekly','1.0')] + [(f'/{s}/','weekly','0.8') for s in CATS] + \
  [(f'/{a["cat"]}/{a["slug"]}/','monthly','0.7') for a in ARTICLES] + \
- [('/about/','yearly','0.5'),('/contact/','yearly','0.4'),('/privacy-policy/','yearly','0.2'),('/terms-of-service/','yearly','0.2'),('/disclaimer/','yearly','0.2')]
+ [('/calculator/','monthly','0.8'),('/about/','yearly','0.5'),('/contact/','yearly','0.4'),('/privacy-policy/','yearly','0.2'),('/terms-of-service/','yearly','0.2'),('/disclaimer/','yearly','0.2')]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for u,cf,pr in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
 sm += '</urlset>\n'
