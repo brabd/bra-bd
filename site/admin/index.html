@@ -74,8 +74,8 @@ th{color:var(--text-mute);font-size:12px}
 </div>
 
 <div class="pane" id="pane-content">
-<div class="adm-card"><h3>প্রকাশিত কনটেন্ট</h3><table id="ct-list"><tr><th>আর্টিকেল</th><th>বিভাগ</th><th>লিংক</th></tr></table>
-<p class="note">নতুন আর্টিকেল যোগ হয় গিটহাব রিপোতে (content/ ফোল্ডারে বডি + manifest.json এন্ট্রি + build.py চালানো)। অটোমেটেড কনটেন্ট পাইপলাইন সেটআপ করা হলে এখানে শিডিউলও দেখা যাবে।</p></div>
+<div class="adm-card"><h3>পাবলিশ কিউ ও শিডিউল</h3><table id="ct-queue"><tr><th>আর্টিকেল</th><th>বিভাগ</th><th>তারিখ</th><th>স্ট্যাটাস</th></tr></table>
+<p class="note">📅 <b>শিডিউলড</b> আর্টিকেলগুলো manifest-এ publishAt তারিখসহ রিপোতে রাখা আছে — প্রতিদিনের অটো-রিবিল্ডে তারিখ এলে নিজে নিজে লাইভ হয়ে যায়। নতুন আর্টিকেল যোগ হয় গিটহাব রিপোতে (content/ + manifest.json + build.py)।</p></div>
 </div>
 </div>
 <div id="login-gate" style="display:none;position:fixed;inset:0;background:var(--cream);z-index:1000;align-items:center;justify-content:center">
@@ -190,12 +190,13 @@ if(rows)rows.forEach(function(r){var el=document.getElementById('cfg-'+r.key);if
 }).catch(function(){});
 }
 
-/* content list */
-fetch('/sitemap.xml').then(function(r){return r.text();}).then(function(x){
-var locs=x.match(/<loc>([^<]+)<\/loc>/g)||[];var ct=document.getElementById('ct-list');
-locs.map(function(l){return l.replace(/<\/?loc>/g,'');}).filter(function(u){return u.split('/').filter(Boolean).length>=4;}).forEach(function(u){
-var parts=u.replace('https://bra.bd','').split('/').filter(Boolean);
-ct.innerHTML+='<tr><td>'+parts[1]+'</td><td>'+parts[0]+'</td><td><a href="/'+parts.join('/')+'/" target="_blank">দেখুন</a></td></tr>';});});
+/* publish queue */
+fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
+var ct=document.getElementById('ct-queue');
+q.sort(function(a,b){return (a.publishAt||'0')<(b.publishAt||'0')?-1:1;});
+q.forEach(function(a){
+var st=a.status==='published'?'<span style="color:#2a7a2a">✓ প্রকাশিত</span>':'<span style="color:var(--amber)">⏳ শিডিউলড</span>';
+ct.innerHTML+='<tr><td>'+(a.status==='published'?'<a href="/'+a.cat+'/'+a.slug+'/" target="_blank">'+a.title+'</a>':a.title)+'</td><td>'+a.cat+'</td><td>'+(a.publishAt||'—')+'</td><td>'+st+'</td></tr>';});}).catch(function(){});
 </script>
 </body>
 </html>

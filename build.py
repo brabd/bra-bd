@@ -17,8 +17,12 @@ CATS = {
  'health-comfort':{'name':'স্বাস্থ্য ও কমফোর্ট','emoji':'💗','desc':'প্রথম ব্রা থেকে মাতৃত্বকাল — স্বাস্থ্য ও আরামের সব প্রশ্নের উত্তর।'},
 }
 
+from datetime import date
 with io.open(os.path.join(CONTENT,'manifest.json'),encoding='utf-8') as f:
-    ARTICLES = json.load(f)  # list of dicts: cat, slug, title, desc, excerpt, minutes, keyword
+    ALL_ARTICLES = json.load(f)  # cat, slug, title, desc, excerpt, minutes, alt, faq_schema, publishAt(optional)
+TODAY = date.today().isoformat()
+ARTICLES = [a for a in ALL_ARTICLES if a.get('publishAt', '') <= TODAY]
+SCHEDULED = [a for a in ALL_ARTICLES if a.get('publishAt', '') > TODAY]
 
 def by_cat(c): return [a for a in ARTICLES if a['cat']==c]
 
@@ -170,5 +174,10 @@ for u,cf,pr in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><changefreq>{cf}</chan
 sm += '</urlset>\n'
 with io.open(os.path.join(ROOT,'sitemap.xml'),'w',encoding='utf-8') as f: f.write(sm)
 with io.open(os.path.join(ROOT,'robots.txt'),'w',encoding='utf-8') as f: f.write(f'User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: {DOMAIN}/sitemap.xml\n')
-print('✓ sitemap.xml, robots.txt')
+# publish queue for admin panel
+queue = [{'slug':a['slug'],'cat':a['cat'],'title':a['title'],'publishAt':a.get('publishAt',''),'status':'published'} for a in ARTICLES] + \
+        [{'slug':a['slug'],'cat':a['cat'],'title':a['title'],'publishAt':a.get('publishAt',''),'status':'scheduled'} for a in SCHEDULED]
+with io.open(os.path.join(ROOT,'admin','queue.json'),'w',encoding='utf-8') as f:
+    json.dump(queue, f, ensure_ascii=False)
+print('✓ sitemap.xml, robots.txt, queue.json —', len(ARTICLES), 'published,', len(SCHEDULED), 'scheduled')
 print('DONE — total pages:', len(ARTICLES)+len(CATS)+6)
