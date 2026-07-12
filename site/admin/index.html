@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>এডমিন প্যানেল — ব্রা বাংলাদেশ</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared.css">
+<style>
+body{background:#f2edf0}
+.adm-wrap{max-width:1000px;margin:0 auto;padding:32px 20px}
+.adm-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.adm-tab{padding:9px 18px;border-radius:8px;border:1px solid var(--border);background:white;cursor:pointer;font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text-mute)}
+.adm-tab.active{background:var(--teal);color:white;border-color:var(--teal)}
+.adm-card{background:white;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.adm-card h3{color:var(--text-main);margin-bottom:14px;font-size:17px}
+.adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.stat-tile{background:var(--teal-lite);border-radius:10px;padding:18px;text-align:center}
+.stat-tile .num{font-size:26px;font-weight:700;color:var(--teal-dark)}
+.stat-tile .lbl{font-size:12px;color:var(--text-mute)}
+label{display:block;font-size:13px;font-weight:600;color:var(--text-main);margin:12px 0 4px}
+input[type=text],select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:14px}
+.btn{background:var(--teal);color:white;border:none;padding:10px 22px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--font-body);margin-top:14px}
+.btn.gray{background:var(--text-mute)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--border);padding:9px 8px;text-align:left}
+th{color:var(--text-mute);font-size:12px}
+.bar{height:8px;background:var(--teal);border-radius:4px}
+.pane{display:none}.pane.active{display:block}
+.note{font-size:12px;color:var(--text-mute);margin-top:6px}
+.ok-msg{color:#2a7a2a;font-size:13px;margin-top:8px;display:none}
+</style>
+</head>
+<body>
+<header><div class="nav-inner"><a href="/" class="logo"><div class="logo-paw">🎀</div>ব্রা বাংলাদেশ — এডমিন</a><nav style="display:flex"><a href="/">সাইট দেখুন</a></nav></div></header>
+<div class="adm-wrap">
+<div class="adm-tabs">
+<button class="adm-tab active" data-pane="overview">📊 ওভারভিউ</button>
+<button class="adm-tab" data-pane="ads">📢 অ্যাডস ম্যানেজার</button>
+<button class="adm-tab" data-pane="seo">🔍 SEO ও ভেরিফিকেশন</button>
+<button class="adm-tab" data-pane="content">📝 কনটেন্ট</button>
+</div>
+
+<div class="pane active" id="pane-overview">
+<div class="adm-card"><h3>সাইট পরিসংখ্যান (সর্বশেষ ৬ মাস)</h3>
+<div class="adm-grid" id="ov-tiles"></div>
+</div>
+<div class="adm-card"><h3>ট্রাফিক সোর্স</h3><table id="ov-sources"><tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr></table></div>
+<div class="adm-card"><h3>সর্বাধিক পঠিত পেজ</h3><table id="ov-pages"><tr><th>পেজ</th><th>ভিউ</th></tr></table></div>
+<div class="adm-card"><h3>দৈনিক ভিউ (শেষ ১৪ দিন)</h3><div id="ov-daily" style="display:flex;align-items:flex-end;gap:4px;height:120px"></div></div>
+<p class="note">📌 এই পরিসংখ্যান ব্রাউজার-ভিত্তিক (localStorage)। সম্পূর্ণ ট্রাফিক ডেটার জন্য SEO ট্যাব থেকে Google Analytics আইডি সেট করুন।</p>
+</div>
+
+<div class="pane" id="pane-ads">
+<div class="adm-card"><h3>অ্যাড পারফরম্যান্স</h3><table id="ad-stats"><tr><th>স্লট</th><th>ভিউ</th><th>ক্লিক</th><th>CTR</th></tr></table></div>
+<div class="adm-card"><h3>অ্যাড স্লট সেটিংস</h3><div id="ad-slots"></div><button class="btn" onclick="saveAds()">সংরক্ষণ করুন</button><p class="ok-msg" id="ads-ok">✓ সংরক্ষিত হয়েছে</p>
+<p class="note">টাইপ: <b>ডামি</b> = অ্যানিমেটেড প্লেসহোল্ডার, <b>কাস্টম</b> = নিজের HTML/ব্যানার কোড, <b>AdSense</b> = SEO ট্যাবে দেওয়া AdSense আইডি ব্যবহার করে অটো অ্যাড।</p></div>
+</div>
+
+<div class="pane" id="pane-seo">
+<div class="adm-card"><h3>ভেরিফিকেশন ও ট্র্যাকিং</h3>
+<label>Google AdSense Publisher ID (ca-pub-XXXX)</label><input type="text" id="cfg-adsense" placeholder="ca-pub-1234567890123456">
+<label>Google Analytics ID (G-XXXX)</label><input type="text" id="cfg-ga" placeholder="G-XXXXXXXXXX">
+<label>Google Search Console ভেরিফিকেশন কোড</label><input type="text" id="cfg-gsc" placeholder="content ভ্যালুটি দিন">
+<label>Bing Webmaster ভেরিফিকেশন কোড</label><input type="text" id="cfg-bing" placeholder="msvalidate.01 ভ্যালু">
+<button class="btn" onclick="saveCfg()">সংরক্ষণ করুন</button><p class="ok-msg" id="cfg-ok">✓ সংরক্ষিত হয়েছে — সাইটের সব পেজে স্বয়ংক্রিয়ভাবে যুক্ত হবে</p>
+</div>
+<div class="adm-card"><h3>SEO চেকলিস্ট</h3>
+<table><tr><td>✅ sitemap.xml</td><td><a href="/sitemap.xml">/sitemap.xml</a></td></tr>
+<tr><td>✅ robots.txt</td><td><a href="/robots.txt">/robots.txt</a></td></tr>
+<tr><td>✅ Schema markup</td><td>Article, FAQPage, WebSite, Organization</td></tr>
+<tr><td>✅ Canonical, OG ট্যাগ</td><td>সব পেজে</td></tr></table>
+<p class="note">সাইট লাইভ হওয়ার পর Search Console-এ গিয়ে sitemap সাবমিট করুন: https://bra.bd/sitemap.xml</p></div>
+</div>
+
+<div class="pane" id="pane-content">
+<div class="adm-card"><h3>প্রকাশিত কনটেন্ট</h3><table id="ct-list"><tr><th>আর্টিকেল</th><th>বিভাগ</th><th>লিংক</th></tr></table>
+<p class="note">নতুন আর্টিকেল যোগ হয় গিটহাব রিপোতে (content/ ফোল্ডারে বডি + manifest.json এন্ট্রি + build.py চালানো)। অটোমেটেড কনটেন্ট পাইপলাইন সেটআপ করা হলে এখানে শিডিউলও দেখা যাবে।</p></div>
+</div>
+</div>
+<script>
+var BN=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];function bn(n){return String(n).replace(/\d/g,function(d){return BN[+d];});}
+document.querySelectorAll('.adm-tab').forEach(function(t){t.onclick=function(){
+document.querySelectorAll('.adm-tab').forEach(function(x){x.classList.remove('active');});
+document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('active');});
+t.classList.add('active');document.getElementById('pane-'+t.dataset.pane).classList.add('active');};});
+
+/* overview */
+var stats=JSON.parse(localStorage.getItem('bb_stats')||'{}');
+var days=Object.keys(stats).sort();
+var totV=0,srcs={},pages={};
+days.forEach(function(d){totV+=stats[d].views;
+Object.keys(stats[d].sources||{}).forEach(function(s){srcs[s]=(srcs[s]||0)+stats[d].sources[s];});
+Object.keys(stats[d].pages||{}).forEach(function(p){pages[p]=(pages[p]||0)+stats[d].pages[p];});});
+var today=new Date().toISOString().slice(0,10);
+document.getElementById('ov-tiles').innerHTML=
+'<div class="stat-tile"><div class="num">'+bn(totV)+'</div><div class="lbl">মোট পেজভিউ</div></div>'+
+'<div class="stat-tile"><div class="num">'+bn((stats[today]||{views:0}).views)+'</div><div class="lbl">আজকের ভিউ</div></div>'+
+'<div class="stat-tile"><div class="num">'+bn(days.length)+'</div><div class="lbl">সক্রিয় দিন</div></div>'+
+'<div class="stat-tile"><div class="num">১২</div><div class="lbl">প্রকাশিত আর্টিকেল</div></div>';
+var st=document.getElementById('ov-sources');var maxS=Math.max.apply(null,Object.values(srcs).concat([1]));
+Object.keys(srcs).sort(function(a,b){return srcs[b]-srcs[a];}).forEach(function(s){
+st.innerHTML+='<tr><td>'+s+'</td><td>'+bn(srcs[s])+'</td><td style="width:40%"><div class="bar" style="width:'+(srcs[s]/maxS*100)+'%"></div></td></tr>';});
+var pt=document.getElementById('ov-pages');
+Object.keys(pages).sort(function(a,b){return pages[b]-pages[a];}).slice(0,10).forEach(function(p){
+pt.innerHTML+='<tr><td>'+p+'</td><td>'+bn(pages[p])+'</td></tr>';});
+var dd=document.getElementById('ov-daily');var last14=[];
+for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);last14.push([k,(stats[k]||{views:0}).views]);}
+var maxD=Math.max.apply(null,last14.map(function(x){return x[1];}).concat([1]));
+last14.forEach(function(x){dd.innerHTML+='<div title="'+x[0]+': '+x[1]+'" style="flex:1;background:var(--teal-lite2);border-radius:3px;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:3px;height:'+(x[1]/maxD*100)+'%"></div></div>';});
+
+/* ads */
+var SLOTS=['header','inArticle1','inArticle2','sidebar','footer'];
+var LBL={header:'হেডার ব্যানার',inArticle1:'আর্টিকেল অ্যাড ১',inArticle2:'আর্টিকেল অ্যাড ২',sidebar:'সাইডবার',footer:'ফুটার ব্যানার'};
+var ads=JSON.parse(localStorage.getItem('bb_ads')||'null')||{};
+var adStats=JSON.parse(localStorage.getItem('bb_ad_stats')||'{}');
+var ast=document.getElementById('ad-stats');
+SLOTS.forEach(function(s){var d=adStats[s]||{views:0,clicks:0};var ctr=d.views?(d.clicks/d.views*100).toFixed(1):'০.০';
+ast.innerHTML+='<tr><td>'+LBL[s]+'</td><td>'+bn(d.views)+'</td><td>'+bn(d.clicks)+'</td><td>'+bn(ctr)+'%</td></tr>';});
+var sl=document.getElementById('ad-slots');
+SLOTS.forEach(function(s){var a=ads[s]||{enabled:true,type:'dummy',html:''};
+sl.innerHTML+='<div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">'+
+'<b>'+LBL[s]+'</b> <label style="display:inline;margin-left:12px;font-weight:400"><input type="checkbox" id="en-'+s+'" '+(a.enabled?'checked':'')+'> চালু</label>'+
+'<label>টাইপ</label><select id="ty-'+s+'"><option value="dummy"'+(a.type==='dummy'?' selected':'')+'>ডামি (প্লেসহোল্ডার)</option><option value="custom"'+(a.type==='custom'?' selected':'')+'>কাস্টম HTML</option><option value="adsense"'+(a.type==='adsense'?' selected':'')+'>AdSense</option></select>'+
+'<label>কাস্টম HTML (টাইপ কাস্টম হলে)</label><textarea id="ht-'+s+'" rows="2">'+(a.html||'')+'</textarea></div>';});
+function saveAds(){var out={};SLOTS.forEach(function(s){out[s]={enabled:document.getElementById('en-'+s).checked,type:document.getElementById('ty-'+s).value,html:document.getElementById('ht-'+s).value,label:LBL[s]};});
+localStorage.setItem('bb_ads',JSON.stringify(out));document.getElementById('ads-ok').style.display='block';}
+
+/* seo config */
+var cfg=JSON.parse(localStorage.getItem('bb_site_config')||'{}');
+['adsense','ga','gsc','bing'].forEach(function(k){document.getElementById('cfg-'+k).value=cfg[k]||'';});
+function saveCfg(){var c={};['adsense','ga','gsc','bing'].forEach(function(k){c[k]=document.getElementById('cfg-'+k).value.trim();});
+localStorage.setItem('bb_site_config',JSON.stringify(c));document.getElementById('cfg-ok').style.display='block';}
+
+/* content list */
+fetch('/sitemap.xml').then(function(r){return r.text();}).then(function(x){
+var locs=x.match(/<loc>([^<]+)<\/loc>/g)||[];var ct=document.getElementById('ct-list');
+locs.map(function(l){return l.replace(/<\/?loc>/g,'');}).filter(function(u){return u.split('/').filter(Boolean).length>=4;}).forEach(function(u){
+var parts=u.replace('https://bra.bd','').split('/').filter(Boolean);
+ct.innerHTML+='<tr><td>'+parts[1]+'</td><td>'+parts[0]+'</td><td><a href="/'+parts.join('/')+'/" target="_blank">দেখুন</a></td></tr>';});});
+</script>
+</body>
+</html>
