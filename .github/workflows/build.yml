@@ -1,0 +1,37 @@
+name: Daily build & publish
+
+on:
+  push:
+    branches: [main]
+    paths: ['content/**', 'build.py']
+  schedule:
+    - cron: '15 3 * * *'   # প্রতিদিন 03:15 UTC = সকাল ৯:১৫ বাংলাদেশ সময়
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build site (publishes due scheduled articles)
+        run: python build.py
+      - name: Commit & push if changed
+        run: |
+          git config user.name "brabd"
+          git config user.email "brabangladesh@gmail.com"
+          git add site
+          if git diff --cached --quiet; then
+            echo "No changes to publish"
+          else
+            git commit -m "auto-build: publish due articles [skip ci]"
+            git push
+          fi
+      - name: IndexNow ping
+        run: python ping_indexnow.py
+        continue-on-error: true

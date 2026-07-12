@@ -28,15 +28,19 @@ def by_cat(c): return [a for a in ARTICLES if a['cat']==c]
 
 GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet">'
 
-def head(title, desc, path, ogtype='website', schema=''):
+def head(title, desc, path, ogtype='website', schema='', ogimage=''):
     url = DOMAIN + path
+    og = f'<meta property="og:image" content="{DOMAIN}{ogimage}">\n' if ogimage else ''
     return ('<!DOCTYPE html>\n<html lang="bn">\n<head>\n<meta charset="UTF-8">\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
     f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
     f'<link rel="canonical" href="{url}">\n'
+    '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n'
+    f'<link rel="alternate" type="application/rss+xml" title="{SITE}" href="/feed.xml">\n'
     f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n'
     f'<meta property="og:url" content="{url}">\n<meta property="og:type" content="{ogtype}">\n'
-    f'<meta property="og:locale" content="bn_BD">\n<meta name="twitter:card" content="summary_large_image">\n'
+    f'<meta property="og:site_name" content="{SITE}">\n'
+    f'<meta property="og:locale" content="bn_BD">\n{og}<meta name="twitter:card" content="summary_large_image">\n'
     f'{GFONTS}\n<link rel="stylesheet" href="/shared.css">\n{schema}\n</head>\n<body>\n')
 
 def nav(active=''):
@@ -80,12 +84,16 @@ for a in ARTICLES:
       "publisher":{"@type":"Organization","name":SITE,"url":DOMAIN+"/"},
       "datePublished":"2026-06-15","dateModified":"2026-07-10",
       "mainEntityOfPage":{"@type":"WebPage","@id":DOMAIN+path}},ensure_ascii=False)+'</script>')
+    schema += '<script type="application/ld+json">'+json.dumps({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+      {"@type":"ListItem","position":1,"name":"হোম","item":DOMAIN+"/"},
+      {"@type":"ListItem","position":2,"name":cat['name'],"item":f"{DOMAIN}/{a['cat']}/"},
+      {"@type":"ListItem","position":3,"name":a['title']}]},ensure_ascii=False)+'</script>'
     if a.get('faq_schema'):
         schema += '<script type="application/ld+json">'+json.dumps({"@context":"https://schema.org","@type":"FAQPage",
           "mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":ans}} for q,ans in a['faq_schema']]},ensure_ascii=False)+'</script>'
     others = [x for x in ARTICLES if x['slug']!=a['slug']][:3]
     related = ''.join(f'<a href="/{x["cat"]}/{x["slug"]}/" class="related-card"><div class="related-card-cat">{CATS[x["cat"]]["name"]}</div><div class="related-card-title">{x["title"]}</div></a>' for x in others)
-    html = (head(f'{a["title"]} — {SITE}', a['desc'], path, 'article', schema) + nav(a['cat']) +
+    html = (head(f'{a["title"]} — {SITE}', a['desc'], path, 'article', schema, f'/images/articles/{a["cat"]}/{a["slug"]}.jpg') + nav(a['cat']) +
     f'''<div class="page-wrap">
 <nav class="breadcrumb"><a href="/">হোম</a><span class="breadcrumb-sep">›</span><a href="/{a['cat']}/">{cat['name']}</a><span class="breadcrumb-sep">›</span><span>{a['title']}</span></nav>
 <div class="article-meta-top"><span class="category-tag">{cat['name']}</span><span class="reading-time">পড়তে সময় লাগবে ~{a['minutes']} মিনিট</span></div>
@@ -174,6 +182,21 @@ for u,cf,pr in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><changefreq>{cf}</chan
 sm += '</urlset>\n'
 with io.open(os.path.join(ROOT,'sitemap.xml'),'w',encoding='utf-8') as f: f.write(sm)
 with io.open(os.path.join(ROOT,'robots.txt'),'w',encoding='utf-8') as f: f.write(f'User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: {DOMAIN}/sitemap.xml\n')
+# RSS feed (published articles, newest scheduled-date first)
+def rss_date(a):
+    d = a.get('publishAt') or '2026-07-10'
+    return d
+items = ''
+for a in sorted(ARTICLES, key=rss_date, reverse=True)[:20]:
+    u = f"{DOMAIN}/{a['cat']}/{a['slug']}/"
+    items += (f'  <item><title>{a["title"]}</title><link>{u}</link><guid>{u}</guid>'
+              f'<pubDate>{rss_date(a)}</pubDate><description>{a["desc"]}</description></item>\n')
+rss = ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>\n'
+ f'<title>{SITE}</title><link>{DOMAIN}/</link><language>bn</language>\n'
+ '<description>বাংলা ভাষায় ব্রা সাইজ, ফিটিং, ধরন, যত্ন ও স্বাস্থ্য বিষয়ক গাইড</description>\n'
+ + items + '</channel></rss>\n')
+with io.open(os.path.join(ROOT,'feed.xml'),'w',encoding='utf-8') as f: f.write(rss)
+
 # publish queue for admin panel
 queue = [{'slug':a['slug'],'cat':a['cat'],'title':a['title'],'publishAt':a.get('publishAt',''),'status':'published'} for a in ARTICLES] + \
         [{'slug':a['slug'],'cat':a['cat'],'title':a['title'],'publishAt':a.get('publishAt',''),'status':'scheduled'} for a in SCHEDULED]
