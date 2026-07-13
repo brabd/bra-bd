@@ -120,6 +120,20 @@ nav a.active{background:var(--teal-lite);color:var(--teal);font-weight:600}
 .ad-dummy{display:flex;align-items:center;justify-content:center;border:1px dashed var(--border-dark);border-radius:var(--radius);background:linear-gradient(270deg,var(--teal-lite),var(--amber-lite),var(--teal-lite));background-size:400% 400%;animation:adShift 6s ease infinite;color:var(--text-mute);font-size:14px;cursor:pointer;min-height:90px}
 .ad-dummy.ad-box{min-height:250px;max-width:300px;margin:0 auto}
 @keyframes adShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+/* ---- Comments ---- */
+.comments-wrap{margin:56px 0 0;border-top:1px solid var(--border);padding-top:32px}
+.cmt-title{font-family:var(--font-head);font-size:22px;color:var(--text-main);margin-bottom:20px}
+.cmt{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.cmt p{margin:0;font-size:15px;line-height:1.8}
+.cmt-name{font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:6px}
+.cmt-author{background:var(--teal-lite);border-color:var(--teal-lite2);margin:12px 0 0 24px}
+.cmt-badge{font-size:11px;font-weight:600;color:white;background:var(--teal);padding:2px 9px;border-radius:20px;margin-left:6px}
+.cmt-form{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:24px}
+.cmt-form h3{font-size:17px;color:var(--text-main);margin-bottom:14px}
+.cmt-form input,.cmt-form textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:15px;margin-bottom:12px;resize:vertical}
+.cmt-form button{background:var(--teal);color:white;border:none;padding:11px 24px;border-radius:var(--radius);font-weight:600;font-size:15px;cursor:pointer;font-family:var(--font-body)}
+.cmt-form button:hover{background:var(--teal-dark)}
+.cmt-note{font-size:12px;color:var(--text-mute);margin-top:10px}
 /* ---- Cookie banner ---- */
 .cookie-banner{position:fixed;bottom:0;left:0;right:0;background:var(--teal-dark);color:rgba(255,255,255,.85);padding:16px 24px;z-index:500;display:none;box-shadow:0 -4px 16px rgba(0,0,0,.2)}
 .cookie-banner.show{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}

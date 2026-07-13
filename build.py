@@ -28,6 +28,66 @@ def by_cat(c): return [a for a in ARTICLES if a['cat']==c]
 BN='০১২৩৪৫৬৭৮৯'
 def bn(n): return ''.join(BN[int(d)] for d in str(n))
 
+# ---------- static seeded comments (deterministic per slug) ----------
+C_NAMES = ['রিমা আক্তার','নুসরাত জাহান','ফারজানা হক','তানিয়া রহমান','শারমিন সুলতানা','মৌসুমী দাস','জান্নাতুল ফেরদৌস','সাদিয়া ইসলাম','লামিয়া চৌধুরী','রুমানা পারভীন','আয়েশা সিদ্দিকা','মিতু খন্দকার','নাবিলা নূর','তাসনিম আরা','ইশরাত জাহান','অন্তরা সাহা','সাবিনা ইয়াসমিন','পপি বেগম','শিলা মণ্ডল','সুমাইয়া হোসেন']
+C_POOL = [
+ 'অনেক উপকারী একটা লেখা। এই বিষয়গুলো নিয়ে বাংলায় এত গুছিয়ে কোথাও পড়িনি। ধন্যবাদ!',
+ 'আপু, লেখাটা পড়ে চোখ খুলে গেল। এতদিন কত ভুল ধারণা নিয়ে ছিলাম!',
+ 'খুবই দরকারি তথ্য। আমার ছোট বোনকেও পড়তে দিলাম।',
+ 'এই সাইটটা আমার বান্ধবী শেয়ার করেছিল, এখন আমি নিয়মিত পড়ি। প্রতিটা লেখাই কাজের।',
+ 'মাশাআল্লাহ, খুব সুন্দর করে বুঝিয়ে লেখা। সহজ ভাষায় এমন লেখা আরও চাই।',
+ 'টিপসগুলো ফলো করে সত্যিই উপকার পেয়েছি। আগে জানলে অনেক ভোগান্তি বাঁচত।',
+ 'এই টপিকে কেউ এভাবে খোলাখুলি লেখে না। আপনাদের সাহসিকতাকে সাধুবাদ।',
+ 'চেকলিস্টটা ফোনে সেভ করে রাখলাম। পরের বার কেনার সময় কাজে লাগবে।',
+ 'আপু একটা প্রশ্ন — এই নিয়মগুলো কি সব বয়সের জন্যই প্রযোজ্য?',
+ 'টেবিলটা দেখে অনেক কিছু পরিষ্কার হলো। এত ডিটেইলে লেখার জন্য ধন্যবাদ।',
+ 'আমার মায়ের জন্য তথ্যগুলো খুঁজছিলাম, এখানে সব পেয়ে গেলাম।',
+ 'লেখাটা পড়ে আজই বাসায় মাপ নিলাম — এতদিন আসলেই ভুল সাইজ পরতাম!',
+ 'ক্যালকুলেটর টুলটাও ব্যবহার করলাম, দারুণ কাজের। সাইটটা প্রিয় তালিকায় রাখলাম।',
+ 'এই ওয়েবসাইটটা আরও আগে পেলে ভালো হতো। প্রতিটা আর্টিকেলই পড়ছি একে একে।',
+ 'আপু, দোকানে গিয়ে ঠিক এই সমস্যাগুলোতেই পড়ি। এবার প্রস্তুত হয়ে যাব।',
+ 'খুব সুন্দর উপস্থাপনা। FAQ অংশটা বিশেষ ভালো লেগেছে — ছোট ছোট প্রশ্নের সরাসরি উত্তর।',
+ 'শেয়ার করলাম আমাদের ফ্যামিলি গ্রুপে। এমন তথ্য সবার জানা দরকার।',
+ 'একটা অনুরোধ — এই বিষয়ে আরও বিস্তারিত একটা লেখা দিলে খুব ভালো হয়।',
+ 'সত্যি বলতে এই বিষয়ে কাউকে জিজ্ঞেস করতে সংকোচ হতো। আপনাদের লেখা পড়ে অনেক প্রশ্নের উত্তর পেলাম।',
+ 'দাম নিয়ে ধারণাটা খুব বাস্তবসম্মত লাগল। বাজেট প্ল্যান করতে সুবিধা হবে।',
+]
+R_POOL = [
+ 'অনেক ধন্যবাদ আপু! আপনাদের এমন মন্তব্যই আমাদের লেখার অনুপ্রেরণা। 🎀',
+ 'ধন্যবাদ! হ্যাঁ, নিয়মগুলো সাধারণভাবে সবার জন্যই — তবে বিশেষ পরিস্থিতিতে (গর্ভাবস্থা, সার্জারি-পরবর্তী) সংশ্লিষ্ট গাইডটা দেখে নেবেন।',
+ 'শুনে খুব ভালো লাগল! সঠিক মাপটাই আসলে অর্ধেক সমাধান। সাইটের ক্যালকুলেটরটাও ট্রাই করতে পারেন।',
+ 'ধন্যবাদ আপু! শেয়ার করে অন্যদের জানার সুযোগ করে দেওয়ার জন্য কৃতজ্ঞতা।',
+ 'অনুরোধটা নোট করে রাখলাম — সামনে এই বিষয়ে আরও বিস্তারিত লেখা আসবে ইনশাআল্লাহ।',
+ 'আপনার উপকারে এসেছে জেনে সার্থক মনে হচ্ছে। যেকোনো প্রশ্ন থাকলে নির্দ্বিধায় জানাবেন।',
+ 'ঠিক বলেছেন — এই সংকোচ ভাঙাটাই আমাদের সাইটের মূল উদ্দেশ্য। পাশে থাকার জন্য ধন্যবাদ!',
+ 'ধন্যবাদ! মায়ের জন্য কেনার আগে আরাম-সংক্রান্ত গাইডগুলোও একবার দেখে নিতে পারেন।',
+]
+def comments_html(slug):
+    h = abs(sum((i+1)*ord(c) for i,c in enumerate(slug)))
+    n = 3 + h % 5  # 3-7
+    items = ''
+    for i in range(n):
+        name = C_NAMES[(h + i*7) % len(C_NAMES)]
+        body = C_POOL[(h + i*13) % len(C_POOL)]
+        items += f'<div class="cmt"><div class="cmt-name">{name}</div><p>{body}</p>'
+        if (h + i) % 3 == 0:
+            reply = R_POOL[(h + i*5) % len(R_POOL)]
+            items += f'<div class="cmt cmt-author"><div class="cmt-name">{AUTHOR} <span class="cmt-badge">লেখক</span></div><p>{reply}</p></div>'
+        items += '</div>'
+    return f'''<div class="comments-wrap"><h2 class="cmt-title">💬 পাঠকদের মন্তব্য ({bn(n)})</h2>
+<div id="cmt-list">{items}</div>
+<div class="cmt-form"><h3>মন্তব্য করুন</h3>
+<input type="text" id="cmt-nm" placeholder="আপনার নাম">
+<textarea id="cmt-bd" rows="3" placeholder="আপনার মন্তব্য লিখুন…"></textarea>
+<button onclick="bbComment('{slug}')">মন্তব্য পাঠান</button>
+<p class="cmt-note" id="cmt-msg">মন্তব্য যাচাইয়ের পর প্রকাশিত হয়।</p></div></div>
+<script>function bbComment(s){{var n=document.getElementById('cmt-nm').value.trim(),b=document.getElementById('cmt-bd').value.trim(),m=document.getElementById('cmt-msg');
+if(!n||!b){{m.textContent='নাম ও মন্তব্য দুটোই লিখুন।';return;}}
+if(window.BB_SB){{BB_SB.insert('comments',{{slug:s,name:n,body:b}}).then(function(){{m.textContent='✓ ধন্যবাদ! আপনার মন্তব্য যাচাইয়ের পর প্রকাশিত হবে।';document.getElementById('cmt-nm').value='';document.getElementById('cmt-bd').value='';}}).catch(function(){{m.textContent='দুঃখিত, এই মুহূর্তে পাঠানো যাচ্ছে না — পরে আবার চেষ্টা করুন।';}});}}
+else m.textContent='দুঃখিত, এই মুহূর্তে পাঠানো যাচ্ছে না।';}}
+if(window.BB_SB){{BB_SB.get('comments?slug=eq.{slug}&approved=eq.true&order=created_at').then(function(rows){{if(!rows||!rows.length)return;var L=document.getElementById('cmt-list');rows.forEach(function(r){{var d=document.createElement('div');d.className='cmt'+(r.is_author?' cmt-author':'');d.innerHTML='<div class=cmt-name></div><p></p>';d.querySelector('.cmt-name').textContent=r.name;d.querySelector('p').textContent=r.body;L.appendChild(d);}});}}).catch(function(){{}});}}
+</script>'''
+
 GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet">'
 
 def head(title, desc, path, ogtype='website', schema='', ogimage=''):
@@ -104,6 +164,7 @@ for a in ARTICLES:
 <div class="author-row"><div class="author-avatar">👩</div><div><div class="author-name">{AUTHOR}</div><div class="author-title">{AUTHOR_TITLE} — সর্বশেষ আপডেট: <span class="dynamic-date"></span></div></div></div>
 <div class="hero-img"><img src="/images/articles/{a['cat']}/{a['slug']}.jpg" alt="{a['alt']}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>
 {body}
+{comments_html(a['slug'])}
 <div class="related-section"><div class="related-title">সম্পর্কিত আর্টিকেল</div><div class="related-grid">{related}</div></div>
 <p class="last-updated">সর্বশেষ আপডেট: <span class="dynamic-date"></span></p>
 </div>''' + footer())

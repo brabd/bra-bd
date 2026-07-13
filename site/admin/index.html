@@ -39,6 +39,7 @@ th{color:var(--text-mute);font-size:12px}
 <button class="adm-tab" data-pane="ads">📢 অ্যাডস ম্যানেজার</button>
 <button class="adm-tab" data-pane="seo">🔍 SEO ও ভেরিফিকেশন</button>
 <button class="adm-tab" data-pane="content">📝 কনটেন্ট</button>
+<button class="adm-tab" data-pane="comments">💬 কমেন্ট</button>
 <button class="adm-tab" data-pane="editor">✏️ এডিটর</button>
 </div>
 
@@ -90,6 +91,12 @@ th{color:var(--text-mute);font-size:12px}
 <div class="adm-card"><h3>পাবলিশ কিউ ও শিডিউল</h3><table id="ct-queue"><tr><th>আর্টিকেল</th><th>বিভাগ</th><th>তারিখ</th><th>স্ট্যাটাস</th></tr></table>
 <p class="note">📅 <b>শিডিউলড</b> আর্টিকেলগুলো manifest-এ publishAt তারিখসহ রিপোতে রাখা আছে — GitHub Actions প্রতিদিন সকাল ৯:১৫-এ (BD সময়) অটো-বিল্ড চালিয়ে তারিখ আসা আর্টিকেল লাইভ করে দেয়।</p></div>
 </div>
+
+<div class="pane" id="pane-comments">
+<div class="adm-card"><h3>💬 কমেন্ট মডারেশন</h3>
+<p class="note" id="cm-status">লোড হচ্ছে…</p>
+<table id="cm-pending"><tr><th>আর্টিকেল</th><th>নাম</th><th>মন্তব্য</th><th></th></tr></table>
+</div></div>
 
 <div class="pane" id="pane-editor">
 <div class="adm-card"><h3>✏️ আর্টিকেল এডিটর (GitHub সরাসরি)</h3>
@@ -275,6 +282,22 @@ content:b64enc(document.getElementById('gh-body').value),sha:ghSha[p]})})
 ghSha[p]=res.content.sha;document.getElementById('gh-ok').style.display='block';document.getElementById('gh-err').textContent='';
 }).catch(function(e){document.getElementById('gh-err').textContent='সেভ ব্যর্থ ('+e+')';});}
 if(localStorage.getItem('bb_gh_token'))document.getElementById('gh-token').placeholder='●●●● টোকেন সংরক্ষিত আছে';
+
+/* comment moderation */
+function cmLoad(){
+if(!window.BB_SB)return;
+BB_SB.get('comments?approved=eq.false&order=created_at.desc&limit=100').then(function(rows){
+var t=document.getElementById('cm-pending');t.innerHTML='<tr><th>আর্টিকেল</th><th>নাম</th><th>মন্তব্য</th><th></th></tr>';
+document.getElementById('cm-status').textContent=rows.length?rows.length+'টি মন্তব্য অনুমোদনের অপেক্ষায়':'✓ কোনো পেন্ডিং মন্তব্য নেই';
+rows.forEach(function(r){
+var tr=document.createElement('tr');
+tr.innerHTML='<td>'+r.slug+'</td><td></td><td></td><td><button class="btn" style="margin:0;padding:6px 12px" data-a="ok">✓</button> <button class="btn gray" style="margin:0;padding:6px 12px" data-a="del">✗</button></td>';
+tr.children[1].textContent=r.name;tr.children[2].textContent=r.body.slice(0,120);
+tr.querySelector('[data-a=ok]').onclick=function(){fetch('https://glkvgagzaitkdofcfjuu.supabase.co/rest/v1/comments?id=eq.'+r.id,{method:'PATCH',headers:{apikey:'sb_publishable_BpTy9z9Q4I6fhDpeLY6amg_aPZoRgAo',Authorization:'Bearer sb_publishable_BpTy9z9Q4I6fhDpeLY6amg_aPZoRgAo','Content-Type':'application/json'},body:JSON.stringify({approved:true})}).then(cmLoad);};
+tr.querySelector('[data-a=del]').onclick=function(){fetch('https://glkvgagzaitkdofcfjuu.supabase.co/rest/v1/comments?id=eq.'+r.id,{method:'DELETE',headers:{apikey:'sb_publishable_BpTy9z9Q4I6fhDpeLY6amg_aPZoRgAo',Authorization:'Bearer sb_publishable_BpTy9z9Q4I6fhDpeLY6amg_aPZoRgAo'}}).then(cmLoad);};
+t.appendChild(tr);});
+}).catch(function(e){document.getElementById('cm-status').innerHTML='⚠️ comments টেবিল এখনো তৈরি হয়নি — Supabase SQL Editor-এ একবার এই কোডটা চালান:<br><code style="font-size:11px">create table comments(id bigint generated always as identity primary key, slug text not null, parent_id bigint, name text not null, body text not null, is_author boolean default false, approved boolean default false, created_at timestamptz default now()); alter table comments enable row level security; create policy "r" on comments for select using (true); create policy "i" on comments for insert with check (true); create policy "u" on comments for update using (true) with check (true); create policy "d" on comments for delete using (true);</code>';});}
+cmLoad();
 
 /* publish queue */
 fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
