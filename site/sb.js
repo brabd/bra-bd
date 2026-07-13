@@ -6,7 +6,12 @@ window.BB_SB = (function(){
     return fetch(URL+path,{method:method||'GET',
       headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:prefer||(method==='POST'?'return=minimal':'')},
       body:body?JSON.stringify(body):undefined})
-      .then(function(r){return r.ok?(r.status===204||method==='POST'&&!prefer?null:r.json()):Promise.reject(r.status);});
+      .then(function(r){
+        return r.text().then(function(t){
+          if(!r.ok){throw new Error('HTTP '+r.status+(t?' — '+t.slice(0,200):''));}
+          return t?JSON.parse(t):null;
+        });
+      });
   }
   return {
     get:function(q){return req(q);},
