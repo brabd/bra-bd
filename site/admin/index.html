@@ -97,7 +97,18 @@ th{color:var(--text-mute);font-size:12px}
 <div class="adm-card"><h3>💬 কমেন্ট মডারেশন</h3>
 <p class="note" id="cm-status">লোড হচ্ছে…</p>
 <table id="cm-pending"><tr><th>আর্টিকেল</th><th>নাম</th><th>মন্তব্য</th><th></th></tr></table>
-</div></div>
+</div>
+<div class="adm-card"><h3>✍️ সিড কমেন্ট এডিটর</h3>
+<p class="note">প্রতিটি আর্টিকেলের নিচে দেখানো পাঠক-কমেন্ট এখান থেকেই বদলাতে/মুছতে/যোগ করতে পারবেন — JSON ঘাঁটার দরকার নেই। সেভ করলে অটো-বিল্ড হয়ে ১-২ মিনিটে লাইভ হবে। (একই GitHub টোকেন লাগে — এডিটর ট্যাবে একবার কানেক্ট করলেই হবে।)</p>
+<button class="btn" id="sc-open" onclick="scOpen()">📂 কমেন্ট লোড করুন</button>
+<p class="note" id="sc-err" style="color:#c0392b"></p>
+<div id="sc-area" style="display:none">
+<label>আর্টিকেল বাছুন</label><select id="sc-art" onchange="scRender()"></select>
+<div id="sc-list" style="margin-top:12px"></div>
+<button class="btn gray" style="margin-right:8px" onclick="scAdd()">＋ নতুন কমেন্ট</button>
+<button class="btn" onclick="scSave()">💾 সেভ ও পাবলিশ</button>
+<p class="ok-msg" id="sc-ok">✓ সেভ হয়েছে — অটো-বিল্ড চলছে, ১-২ মিনিটে সাইটে দেখা যাবে</p>
+</div></div></div>
 
 <div class="pane" id="pane-editor">
 <div class="adm-card"><h3>✏️ আর্টিকেল এডিটর (GitHub সরাসরি)</h3>
@@ -313,6 +324,55 @@ tr.querySelector('[data-a=del]').onclick=function(){fetch('https://glkvgagzaitkd
 t.appendChild(tr);});
 }).catch(function(e){document.getElementById('cm-status').innerHTML='⚠️ comments টেবিল এখনো তৈরি হয়নি — Supabase SQL Editor-এ একবার এই কোডটা চালান:<br><code style="font-size:11px">create table comments(id bigint generated always as identity primary key, slug text not null, parent_id bigint, name text not null, body text not null, is_author boolean default false, approved boolean default false, created_at timestamptz default now()); alter table comments enable row level security; create policy "r" on comments for select using (true); create policy "i" on comments for insert with check (true); create policy "u" on comments for update using (true) with check (true); create policy "d" on comments for delete using (true);</code>';});}
 cmLoad();
+
+/* seed comment editor */
+var SC_PATH='content/seed-comments.json',scData=null,scSha=null,scTitles={};
+function scOpen(){
+document.getElementById('sc-err').textContent='';
+if(!localStorage.getItem('bb_gh_token')){document.getElementById('sc-err').textContent='আগে ✏️ এডিটর ট্যাবে GitHub টোকেন দিয়ে কানেক্ট করুন';return;}
+Promise.all([
+fetch(GH+SC_PATH,{headers:ghHdr()}).then(function(r){if(!r.ok)throw r.status;return r.json();}),
+fetch('/admin/queue.json').then(function(r){return r.json();})
+]).then(function(res){
+scData=JSON.parse(b64dec(res[0].content));scSha=res[0].sha;
+var sel=document.getElementById('sc-art');sel.innerHTML='';
+res[1].forEach(function(a){scTitles[a.slug]=a.title;});
+Object.keys(scData).forEach(function(s){
+var o=document.createElement('option');o.value=s;o.textContent=(scTitles[s]||s)+' ('+scData[s].length+'টি)';sel.appendChild(o);});
+document.getElementById('sc-area').style.display='block';scRender();
+}).catch(function(e){document.getElementById('sc-err').textContent='লোড ব্যর্থ ('+e+') — টোকেন ঠিক আছে কি না দেখুন';});}
+function scRender(){
+var s=document.getElementById('sc-art').value,box=document.getElementById('sc-list');box.innerHTML='';
+(scData[s]||[]).forEach(function(c,i){
+var d=document.createElement('div');
+d.style.cssText='border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:12px;margin-bottom:10px;background:#fff';
+d.innerHTML='<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'
++'<input type="text" data-f="name" style="flex:0 0 180px" placeholder="নাম">'
++'<button class="btn gray" style="margin:0;padding:6px 12px" data-a="del">🗑 মুছুন</button></div>'
++'<textarea data-f="body" rows="2" placeholder="মন্তব্য" style="font-size:14px"></textarea>'
++'<label style="margin-top:6px;font-size:12px">লেখকের উত্তর (খালি রাখলে উত্তর থাকবে না)</label>'
++'<textarea data-f="reply" rows="2" style="font-size:14px;border-left:3px solid var(--amber)"></textarea>';
+d.querySelector('[data-f=name]').value=c.name;
+d.querySelector('[data-f=body]').value=c.body;
+d.querySelector('[data-f=reply]').value=c.reply||'';
+d.querySelector('[data-f=name]').oninput=function(){c.name=this.value;};
+d.querySelector('[data-f=body]').oninput=function(){c.body=this.value;};
+d.querySelector('[data-f=reply]').oninput=function(){c.reply=this.value.trim()||null;};
+d.querySelector('[data-a=del]').onclick=function(){scData[s].splice(i,1);scRender();};
+box.appendChild(d);});}
+function scAdd(){
+var s=document.getElementById('sc-art').value;
+scData[s].push({name:'',body:'',reply:null});scRender();
+var box=document.getElementById('sc-list');box.lastChild.querySelector('[data-f=name]').focus();}
+function scSave(){
+document.getElementById('sc-err').textContent='';
+var s=document.getElementById('sc-art').value;
+scData[s]=scData[s].filter(function(c){return c.name.trim()&&c.body.trim();});
+fetch(GH+SC_PATH,{method:'PUT',headers:ghHdr(),
+body:JSON.stringify({message:'কমেন্ট আপডেট: '+(scTitles[s]||s),content:b64enc(JSON.stringify(scData,null,1)),sha:scSha})})
+.then(function(r){if(!r.ok)throw r.status;return r.json();}).then(function(res){
+scSha=res.content.sha;document.getElementById('sc-ok').style.display='block';scRender();
+}).catch(function(e){document.getElementById('sc-err').textContent='সেভ ব্যর্থ ('+e+') — আবার লোড করে চেষ্টা করুন';});}
 
 /* publish queue */
 fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
