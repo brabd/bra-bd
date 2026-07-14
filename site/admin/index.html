@@ -49,8 +49,9 @@ th{color:var(--text-mute);font-size:12px}
 </div>
 <div class="adm-card"><h3>ট্রাফিক সোর্স</h3><table id="ov-sources"><tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr></table></div>
 <div class="adm-card"><h3>সর্বাধিক পঠিত পেজ</h3><table id="ov-pages"><tr><th>পেজ</th><th>ভিউ</th></tr></table></div>
-<div class="adm-card"><h3>দৈনিক ভিউ (শেষ ১৪ দিন)</h3><div id="ov-daily" style="display:flex;align-items:flex-end;gap:4px;height:120px"></div></div>
-<p class="note">📌 এই পরিসংখ্যান ব্রাউজার-ভিত্তিক (localStorage)। সম্পূর্ণ ট্রাফিক ডেটার জন্য SEO ট্যাব থেকে Google Analytics আইডি সেট করুন।</p>
+<div class="adm-card"><h3>দৈনিক ভিউ (শেষ ১৪ দিন)</h3><div id="ov-daily" style="display:flex;gap:5px;height:150px"></div></div>
+<div class="adm-card"><h3>ডিভাইস (এই ব্রাউজারের ডেটা)</h3><table id="ov-devices"><tr><th>ডিভাইস</th><th>ভিউ</th><th></th></tr></table></div>
+<p class="note" id="ov-note">📌 ডেটা সোর্স: <b id="ov-src-label">লোকাল (এই ব্রাউজার)</b>। Supabase সংযুক্ত থাকলে সব ভিজিটরের কেন্দ্রীয় ডেটা দেখানো হয়। সম্পূর্ণ অ্যানালিটিক্সের জন্য SEO ট্যাবে Google Analytics আইডি সেট করুন।</p>
 </div>
 
 <div class="pane" id="pane-ads">
@@ -139,29 +140,55 @@ document.querySelectorAll('.adm-tab').forEach(function(x){x.classList.remove('ac
 document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('active');});
 t.classList.add('active');document.getElementById('pane-'+t.dataset.pane).classList.add('active');};});
 
-/* overview */
+/* overview — শেয়ার্ড রেন্ডারার (লোকাল ও Supabase দুই সোর্সের জন্য) */
+function tile(n,l){return '<div class="stat-tile"><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>';}
+function renderStats(o){
+var last14=[];for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);last14.push([k,o.byDay[k]||0]);}
+var t7=0,p7=0;last14.forEach(function(x,i){if(i>=7)t7+=x[1];else p7+=x[1];});
+var trend=p7?Math.round((t7-p7)/p7*100):(t7?100:0);
+var trendTxt=(trend>=0?'▲':'▼')+' '+bn(Math.abs(trend))+'%';
+var topSrc='—',mxT=0;Object.keys(o.srcs).forEach(function(s){if(o.srcs[s]>mxT){mxT=o.srcs[s];topSrc=s;}});
+var totS=0;Object.keys(o.srcs).forEach(function(s){totS+=o.srcs[s];});
+document.getElementById('ov-tiles').innerHTML=
+ tile(bn(o.total),'মোট পেজভিউ')+
+ tile(bn(o.today),'আজকের ভিউ')+
+ tile(bn(t7),'গত ৭ দিন')+
+ tile('<span style="color:'+(trend>=0?'#2a7a2a':'#c0392b')+'">'+trendTxt+'</span>','আগের ৭ দিনের তুলনায়')+
+ tile(bn(o.days),'সক্রিয় দিন')+
+ tile(topSrc,'শীর্ষ সোর্স')+
+ tile('…','প্রকাশিত আর্টিকেল');
+var st=document.getElementById('ov-sources');st.innerHTML='<tr><th>সোর্স</th><th>ভিজিট</th><th>%</th><th></th></tr>';
+var maxS=Math.max.apply(null,Object.values(o.srcs).concat([1]));
+Object.keys(o.srcs).sort(function(a,b){return o.srcs[b]-o.srcs[a];}).forEach(function(s){
+st.innerHTML+='<tr><td>'+s+'</td><td>'+bn(o.srcs[s])+'</td><td>'+bn(totS?Math.round(o.srcs[s]/totS*100):0)+'%</td><td style="width:36%"><div class="bar" style="width:'+(o.srcs[s]/maxS*100)+'%"></div></td></tr>';});
+if(!Object.keys(o.srcs).length)st.innerHTML+='<tr><td colspan="4" style="color:var(--text-mute)">এখনো কোনো ডেটা নেই</td></tr>';
+var pt=document.getElementById('ov-pages');pt.innerHTML='<tr><th>পেজ</th><th>ভিউ</th><th></th></tr>';
+var maxP=Math.max.apply(null,Object.values(o.pages).concat([1]));
+Object.keys(o.pages).sort(function(a,b){return o.pages[b]-o.pages[a];}).slice(0,12).forEach(function(p){
+pt.innerHTML+='<tr><td style="word-break:break-all">'+p+'</td><td>'+bn(o.pages[p])+'</td><td style="width:30%"><div class="bar" style="width:'+(o.pages[p]/maxP*100)+'%;background:var(--amber)"></div></td></tr>';});
+var dd=document.getElementById('ov-daily');dd.innerHTML='';
+var maxD=Math.max.apply(null,last14.map(function(x){return x[1];}).concat([1]));
+last14.forEach(function(x){
+dd.innerHTML+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;min-width:0">'+
+'<span style="font-size:10px;color:var(--teal-dark);font-weight:700">'+(x[1]?bn(x[1]):'')+'</span>'+
+'<div title="'+x[0]+': '+x[1]+' ভিউ" style="width:100%;flex:1;background:var(--teal-lite);border-radius:4px;position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:4px 4px 0 0;height:'+(x[1]?Math.max(x[1]/maxD*100,5):0)+'%"></div></div>'+
+'<span style="font-size:9px;color:var(--text-mute)">'+bn(x[0].slice(8,10))+'/'+bn(x[0].slice(5,7))+'</span></div>';});
+var dv=document.getElementById('ov-devices');dv.innerHTML='<tr><th>ডিভাইস</th><th>ভিউ</th><th></th></tr>';
+var devs=o.devices||{};var maxV=Math.max.apply(null,Object.values(devs).concat([1]));
+Object.keys(devs).sort(function(a,b){return devs[b]-devs[a];}).forEach(function(d){
+dv.innerHTML+='<tr><td>'+d+'</td><td>'+bn(devs[d])+'</td><td style="width:36%"><div class="bar" style="width:'+(devs[d]/maxV*100)+'%"></div></td></tr>';});
+if(!Object.keys(devs).length)dv.innerHTML+='<tr><td colspan="3" style="color:var(--text-mute)">ডিভাইস ডেটা শুধু লোকাল পরিসংখ্যানে পাওয়া যায়</td></tr>';
+fillPubCount();
+}
 var stats=JSON.parse(localStorage.getItem('bb_stats')||'{}');
 var days=Object.keys(stats).sort();
-var totV=0,srcs={},pages={};
-days.forEach(function(d){totV+=stats[d].views;
+var totV=0,srcs={},pages={},devices={},byDay={};
+days.forEach(function(d){totV+=stats[d].views;byDay[d]=stats[d].views;
 Object.keys(stats[d].sources||{}).forEach(function(s){srcs[s]=(srcs[s]||0)+stats[d].sources[s];});
-Object.keys(stats[d].pages||{}).forEach(function(p){pages[p]=(pages[p]||0)+stats[d].pages[p];});});
+Object.keys(stats[d].pages||{}).forEach(function(p){pages[p]=(pages[p]||0)+stats[d].pages[p];});
+Object.keys(stats[d].devices||{}).forEach(function(v){devices[v]=(devices[v]||0)+stats[d].devices[v];});});
 var today=new Date().toISOString().slice(0,10);
-document.getElementById('ov-tiles').innerHTML=
-'<div class="stat-tile"><div class="num">'+bn(totV)+'</div><div class="lbl">মোট পেজভিউ</div></div>'+
-'<div class="stat-tile"><div class="num">'+bn((stats[today]||{views:0}).views)+'</div><div class="lbl">আজকের ভিউ</div></div>'+
-'<div class="stat-tile"><div class="num">'+bn(days.length)+'</div><div class="lbl">সক্রিয় দিন</div></div>'+
-'<div class="stat-tile"><div class="num">১২</div><div class="lbl">প্রকাশিত আর্টিকেল</div></div>';
-var st=document.getElementById('ov-sources');var maxS=Math.max.apply(null,Object.values(srcs).concat([1]));
-Object.keys(srcs).sort(function(a,b){return srcs[b]-srcs[a];}).forEach(function(s){
-st.innerHTML+='<tr><td>'+s+'</td><td>'+bn(srcs[s])+'</td><td style="width:40%"><div class="bar" style="width:'+(srcs[s]/maxS*100)+'%"></div></td></tr>';});
-var pt=document.getElementById('ov-pages');
-Object.keys(pages).sort(function(a,b){return pages[b]-pages[a];}).slice(0,10).forEach(function(p){
-pt.innerHTML+='<tr><td>'+p+'</td><td>'+bn(pages[p])+'</td></tr>';});
-var dd=document.getElementById('ov-daily');var last14=[];
-for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);last14.push([k,(stats[k]||{views:0}).views]);}
-var maxD=Math.max.apply(null,last14.map(function(x){return x[1];}).concat([1]));
-last14.forEach(function(x){dd.innerHTML+='<div title="'+x[0]+': '+x[1]+'" style="flex:1;background:var(--teal-lite2);border-radius:3px;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:3px;height:'+(x[1]/maxD*100)+'%"></div></div>';});
+renderStats({total:totV,today:(stats[today]||{views:0}).views,days:days.length,srcs:srcs,pages:pages,byDay:byDay,devices:devices});
 
 /* ads */
 var SLOTS=['header','inArticle1','inArticle2','sidebar','footer'];
@@ -194,23 +221,11 @@ document.getElementById('cfg-ok').style.display='block';}
 if(window.BB_SB){
 BB_SB.get('visits?select=day,path,source&order=day.desc&limit=10000').then(function(rows){
 if(!rows||!rows.length)return;
-var tv=rows.length,s2={},p2={},d2={};
+var s2={},p2={},d2={};
 rows.forEach(function(r){s2[r.source]=(s2[r.source]||0)+1;p2[r.path]=(p2[r.path]||0)+1;d2[r.day]=(d2[r.day]||0)+1;});
 var today2=new Date().toISOString().slice(0,10);
-document.getElementById('ov-tiles').innerHTML=
-'<div class="stat-tile"><div class="num">'+bn(tv)+'</div><div class="lbl">মোট পেজভিউ (সব ভিজিটর)</div></div>'+
-'<div class="stat-tile"><div class="num">'+bn(d2[today2]||0)+'</div><div class="lbl">আজকের ভিউ</div></div>'+
-'<div class="stat-tile"><div class="num">'+bn(Object.keys(d2).length)+'</div><div class="lbl">সক্রিয় দিন</div></div>'+
-'<div class="stat-tile"><div class="num">১২</div><div class="lbl">প্রকাশিত আর্টিকেল</div></div>';
-var st2=document.getElementById('ov-sources');st2.innerHTML='<tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr>';
-var mx=Math.max.apply(null,Object.values(s2));
-Object.keys(s2).sort(function(a,b){return s2[b]-s2[a];}).forEach(function(s){st2.innerHTML+='<tr><td>'+s+'</td><td>'+bn(s2[s])+'</td><td style="width:40%"><div class="bar" style="width:'+(s2[s]/mx*100)+'%"></div></td></tr>';});
-var pt2=document.getElementById('ov-pages');pt2.innerHTML='<tr><th>পেজ</th><th>ভিউ</th></tr>';
-Object.keys(p2).sort(function(a,b){return p2[b]-p2[a];}).slice(0,10).forEach(function(p){pt2.innerHTML+='<tr><td>'+p+'</td><td>'+bn(p2[p])+'</td></tr>';});
-var dd2=document.getElementById('ov-daily');dd2.innerHTML='';
-var l14=[];for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);l14.push([k,d2[k]||0]);}
-var mD=Math.max.apply(null,l14.map(function(x){return x[1];}).concat([1]));
-l14.forEach(function(x){dd2.innerHTML+='<div title="'+x[0]+': '+x[1]+'" style="flex:1;background:var(--teal-lite2);border-radius:3px;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:3px;height:'+(x[1]/mD*100)+'%"></div></div>';});
+renderStats({total:rows.length,today:d2[today2]||0,days:Object.keys(d2).length,srcs:s2,pages:p2,byDay:d2,devices:devices});
+var lb=document.getElementById('ov-src-label');if(lb)lb.textContent='Supabase কেন্দ্রীয় (সব ভিজিটর) — ডিভাইস টেবিলটি লোকাল';
 }).catch(function(){});
 BB_SB.get('ad_events?select=slot,kind&limit=10000').then(function(rows){
 if(!rows||!rows.length)return;
@@ -229,10 +244,10 @@ if(rows)rows.forEach(function(r){var el=document.getElementById('cfg-'+r.key);if
 }
 
 /* প্রকাশিত আর্টিকেল সংখ্যা — queue.json থেকে অটো */
-fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
+function fillPubCount(){fetch('/admin/queue.json').then(function(r){return r.json();}).then(function(q){
 var n=bn(q.filter(function(x){return x.status==='published';}).length);
 document.querySelectorAll('#ov-tiles .stat-tile').forEach(function(t){
-if(t.textContent.indexOf('প্রকাশিত আর্টিকেল')>-1)t.querySelector('.num').textContent=n;});}).catch(function(){});
+if(t.textContent.indexOf('প্রকাশিত আর্টিকেল')>-1)t.querySelector('.num').textContent=n;});}).catch(function(){});}
 
 /* SEO health check */
 function seoHealth(){

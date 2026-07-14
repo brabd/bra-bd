@@ -64,13 +64,31 @@
   try{
     var stats=JSON.parse(localStorage.getItem('bb_stats')||'{}');
     var day=new Date().toISOString().slice(0,10);
-    stats[day]=stats[day]||{views:0,pages:{},sources:{}};
+    stats[day]=stats[day]||{views:0,pages:{},sources:{},devices:{}};
+    stats[day].devices=stats[day].devices||{};
     stats[day].views++;
     stats[day].pages[location.pathname]=(stats[day].pages[location.pathname]||0)+1;
     var src='সরাসরি';
     if(document.referrer){try{var rh=new URL(document.referrer).hostname;
-      if(/google\./.test(rh))src='গুগল সার্চ';else if(/bing\./.test(rh))src='বিং';else if(/facebook|fb\./.test(rh))src='ফেসবুক';else if(rh!==location.hostname)src=rh;else src='অভ্যন্তরীণ';}catch(e){}}
+      if(/google\./.test(rh))src='গুগল সার্চ';
+      else if(/bing\./.test(rh))src='বিং সার্চ';
+      else if(/yahoo\./.test(rh))src='ইয়াহু';
+      else if(/duckduckgo/.test(rh))src='DuckDuckGo';
+      else if(/yandex/.test(rh))src='Yandex';
+      else if(/facebook|fb\.com|fb\.me|l\.messenger/.test(rh))src='ফেসবুক';
+      else if(/instagram/.test(rh))src='ইনস্টাগ্রাম';
+      else if(/youtube|youtu\.be/.test(rh))src='ইউটিউব';
+      else if(/whatsapp|wa\.me/.test(rh))src='হোয়াটসঅ্যাপ';
+      else if(/t\.co|twitter|x\.com/.test(rh))src='X (টুইটার)';
+      else if(/tiktok/.test(rh))src='টিকটক';
+      else if(/pinterest/.test(rh))src='পিন্টারেস্ট';
+      else if(/linkedin/.test(rh))src='লিংকডইন';
+      else if(/telegram|t\.me/.test(rh))src='টেলিগ্রাম';
+      else if(rh!==location.hostname)src='রেফারেল: '+rh;
+      else src='অভ্যন্তরীণ';}catch(e){}}
     stats[day].sources[src]=(stats[day].sources[src]||0)+1;
+    var dev=/Mobi|Android|iPhone/i.test(navigator.userAgent)?'মোবাইল':(/iPad|Tablet/i.test(navigator.userAgent)?'ট্যাবলেট':'ডেস্কটপ');
+    stats[day].devices[dev]=(stats[day].devices[dev]||0)+1;
     var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
     Object.keys(stats).forEach(function(k){if(new Date(k)<cutoff)delete stats[k];});
     localStorage.setItem('bb_stats',JSON.stringify(stats));
