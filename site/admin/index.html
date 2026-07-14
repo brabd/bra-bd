@@ -48,7 +48,8 @@ th{color:var(--text-mute);font-size:12px}
 <div class="adm-grid" id="ov-tiles"></div>
 </div>
 <div class="adm-card"><h3>ট্রাফিক সোর্স</h3><table id="ov-sources"><tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr></table></div>
-<div class="adm-card"><h3>সর্বাধিক পঠিত পেজ</h3><table id="ov-pages"><tr><th>পেজ</th><th>ভিউ</th></tr></table></div>
+<div class="adm-card"><h3>সর্বাধিক পঠিত পেজ</h3><table id="ov-pages"><tr><th>পেজ</th><th>ভিউ</th></tr></table>
+<div id="ov-pages-nav" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px"></div></div>
 <div class="adm-card"><h3>দৈনিক ভিউ (শেষ ১৪ দিন)</h3><div id="ov-daily" style="display:flex;gap:5px;height:150px"></div></div>
 <div class="adm-card"><h3>ডিভাইস (এই ব্রাউজারের ডেটা)</h3><table id="ov-devices"><tr><th>ডিভাইস</th><th>ভিউ</th><th></th></tr></table></div>
 <p class="note" id="ov-note">📌 ডেটা সোর্স: <b id="ov-src-label">লোকাল (এই ব্রাউজার)</b>। Supabase সংযুক্ত থাকলে সব ভিজিটরের কেন্দ্রীয় ডেটা দেখানো হয়। সম্পূর্ণ অ্যানালিটিক্সের জন্য SEO ট্যাবে Google Analytics আইডি সেট করুন।</p>
@@ -153,6 +154,25 @@ t.classList.add('active');document.getElementById('pane-'+t.dataset.pane).classL
 
 /* overview — শেয়ার্ড রেন্ডারার (লোকাল ও Supabase দুই সোর্সের জন্য) */
 function tile(n,l){return '<div class="stat-tile"><div class="num">'+n+'</div><div class="lbl">'+l+'</div></div>';}
+/* সর্বাধিক পঠিত পেজ — পেজিনেশন (১০টি করে) */
+var pgRows=[],pgIdx=0,PG_SIZE=10;
+function pgRender(){
+var pt=document.getElementById('ov-pages');pt.innerHTML='<tr><th>পেজ</th><th>ভিউ</th><th></th></tr>';
+var nav=document.getElementById('ov-pages-nav');
+if(!pgRows.length){pt.innerHTML+='<tr><td colspan="3" style="color:var(--text-mute)">এখনো কোনো ডেটা নেই</td></tr>';nav.innerHTML='';return;}
+var pages=Math.ceil(pgRows.length/PG_SIZE);if(pgIdx>=pages)pgIdx=pages-1;
+var maxP=pgRows[0][1]||1;
+pgRows.slice(pgIdx*PG_SIZE,(pgIdx+1)*PG_SIZE).forEach(function(x,i){
+pt.innerHTML+='<tr><td style="color:var(--text-mute);width:34px">'+bn(pgIdx*PG_SIZE+i+1)+'</td><td style="word-break:break-all">'+x[0]+'</td><td>'+bn(x[1])+'</td></tr>';});
+pt.rows[0].innerHTML='<th style="width:34px">#</th><th>পেজ</th><th>ভিউ</th>';
+function pgBtn(id,txt,off){return '<button class="btn gray" id="'+id+'"'+(off?' disabled':'')+' style="margin:0;padding:6px 14px'+(off?';opacity:.4;cursor:default':'')+'">'+txt+'</button>';}
+nav.innerHTML=(pages>1?pgBtn('pg-prev','‹ আগে',pgIdx===0):'')+
+'<span style="font-size:13px;color:var(--text-mute)">পৃষ্ঠা '+bn(pgIdx+1)+' / '+bn(pages)+' — মোট '+bn(pgRows.length)+'টি পেজ</span>'+
+(pages>1?pgBtn('pg-next','পরে ›',pgIdx>=pages-1):'');
+var pv=document.getElementById('pg-prev'),nx=document.getElementById('pg-next');
+if(pv)pv.onclick=function(){if(pgIdx>0){pgIdx--;pgRender();}};
+if(nx)nx.onclick=function(){if(pgIdx<pages-1){pgIdx++;pgRender();}};
+}
 function renderStats(o){
 var last14=[];for(var i=13;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var k=dt.toISOString().slice(0,10);last14.push([k,o.byDay[k]||0]);}
 var t7=0,p7=0;last14.forEach(function(x,i){if(i>=7)t7+=x[1];else p7+=x[1];});
@@ -173,10 +193,8 @@ var maxS=Math.max.apply(null,Object.values(o.srcs).concat([1]));
 Object.keys(o.srcs).sort(function(a,b){return o.srcs[b]-o.srcs[a];}).forEach(function(s){
 st.innerHTML+='<tr><td>'+s+'</td><td>'+bn(o.srcs[s])+'</td><td>'+bn(totS?Math.round(o.srcs[s]/totS*100):0)+'%</td><td style="width:36%"><div class="bar" style="width:'+(o.srcs[s]/maxS*100)+'%"></div></td></tr>';});
 if(!Object.keys(o.srcs).length)st.innerHTML+='<tr><td colspan="4" style="color:var(--text-mute)">এখনো কোনো ডেটা নেই</td></tr>';
-var pt=document.getElementById('ov-pages');pt.innerHTML='<tr><th>পেজ</th><th>ভিউ</th><th></th></tr>';
-var maxP=Math.max.apply(null,Object.values(o.pages).concat([1]));
-Object.keys(o.pages).sort(function(a,b){return o.pages[b]-o.pages[a];}).slice(0,12).forEach(function(p){
-pt.innerHTML+='<tr><td style="word-break:break-all">'+p+'</td><td>'+bn(o.pages[p])+'</td><td style="width:30%"><div class="bar" style="width:'+(o.pages[p]/maxP*100)+'%;background:var(--amber)"></div></td></tr>';});
+pgRows=Object.keys(o.pages).sort(function(a,b){return o.pages[b]-o.pages[a];}).map(function(p){return [p,o.pages[p]];});
+pgIdx=0;pgRender();
 var dd=document.getElementById('ov-daily');dd.innerHTML='';
 var maxD=Math.max.apply(null,last14.map(function(x){return x[1];}).concat([1]));
 last14.forEach(function(x){
