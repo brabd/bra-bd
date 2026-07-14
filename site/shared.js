@@ -31,7 +31,8 @@
       var b=document.createElement('div');b.className='cookie-banner show';
       b.innerHTML='<p>আমরা আপনার অভিজ্ঞতা উন্নত করতে এবং বিজ্ঞাপন দেখাতে কুকিজ ব্যবহার করি। বিস্তারিত জানতে আমাদের <a href="/privacy-policy/">প্রাইভেসি পলিসি</a> দেখুন।</p><button class="cookie-btn" id="ck-ok">সম্মতি দিচ্ছি</button><button class="cookie-btn secondary" id="ck-no">শুধু প্রয়োজনীয়</button>';
       document.body.appendChild(b);
-      document.getElementById('ck-ok').onclick=function(){localStorage.setItem('bb_cookie_choice','all');b.remove();};
+      document.getElementById('ck-ok').onclick=function(){localStorage.setItem('bb_cookie_choice','all');b.remove();
+        if(window.gtag){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});}};
       document.getElementById('ck-no').onclick=function(){localStorage.setItem('bb_cookie_choice','essential');b.remove();};
     }
   });
@@ -48,9 +49,9 @@
     var cfg=JSON.parse(localStorage.getItem('bb_site_config')||'{}');
     if(cfg.gsc){var m1=document.createElement('meta');m1.name='google-site-verification';m1.content=cfg.gsc;document.head.appendChild(m1);}
     if(cfg.bing){var m2=document.createElement('meta');m2.name='msvalidate.01';m2.content=cfg.bing;document.head.appendChild(m2);}
-    if(cfg.ga&&localStorage.getItem('bb_cookie_choice')==='all'){
+    if(cfg.ga&&!window.gtag&&localStorage.getItem('bb_cookie_choice')==='all'){
       var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+cfg.ga;document.head.appendChild(s);
-      window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+      window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};
       gtag('js',new Date());gtag('config',cfg.ga);
     }
     if(cfg.adsense&&localStorage.getItem('bb_cookie_choice')==='all'){

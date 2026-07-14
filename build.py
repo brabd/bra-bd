@@ -59,12 +59,20 @@ else m.textContent='দুঃখিত, এই মুহূর্তে পা�
 if(window.BB_SB){{BB_SB.get('comments?slug=eq.{slug}&approved=eq.true&order=created_at').then(function(rows){{if(!rows||!rows.length)return;var L=document.getElementById('cmt-list');rows.forEach(function(r){{var d=document.createElement('div');d.className='cmt';d.innerHTML='<div class="cmt-head"><span class="cmt-avatar" style="background:#2471A3"></span><span class="cmt-name"></span></div><p></p>';d.querySelector('.cmt-avatar').textContent=(r.name||'?').charAt(0);d.querySelector('.cmt-name').textContent=r.name;d.querySelector('p').textContent=r.body;L.appendChild(d);}});}}).catch(function(){{}});}}
 </script>'''
 
+GA_ID = 'G-TNYN5RX17H'
+GA_SNIPPET = ('<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+"gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied'});"
+"if(localStorage.getItem('bb_cookie_choice')==='all'){gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});}"
+f"gtag('js',new Date());gtag('config','{GA_ID}');</script>\n"
+f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>')
+
 GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet">'
 
 def head(title, desc, path, ogtype='website', schema='', ogimage=''):
     url = DOMAIN + path
     og = f'<meta property="og:image" content="{DOMAIN}{ogimage}">\n' if ogimage else ''
     return ('<!DOCTYPE html>\n<html lang="bn">\n<head>\n<meta charset="UTF-8">\n'
+    f'{GA_SNIPPET}\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
     f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
     f'<link rel="canonical" href="{url}">\n'
