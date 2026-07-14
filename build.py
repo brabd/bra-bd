@@ -243,6 +243,18 @@ sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps
 for u,cf,pr in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
 sm += '</urlset>\n'
 with io.open(os.path.join(ROOT,'sitemap.xml'),'w',encoding='utf-8') as f: f.write(sm)
+# ---------- 404 ----------
+nf = (head('পেজটি পাওয়া যায়নি — bra.bd', 'দুঃখিত, এই ঠিকানায় কোনো পেজ নেই।', '/404')
+ + nav()
+ + '<main style="max-width:640px;margin:0 auto;padding:70px 20px;text-align:center">'
+ '<div style="font-size:64px;margin-bottom:8px">🎀</div>'
+ '<h1 style="font-family:var(--font-head);color:var(--teal-dark);font-size:32px;margin-bottom:12px">পেজটি পাওয়া যায়নি (৪০৪)</h1>'
+ '<p style="color:var(--text-mute);margin-bottom:26px">লিংকটি ভুল হতে পারে, অথবা পেজটি সরিয়ে ফেলা হয়েছে। নিচের যেকোনো জায়গা থেকে আবার শুরু করুন:</p>'
+ '<p><a class="btn" href="/">🏠 হোমপেজ</a> &nbsp; <a class="btn" style="background:var(--amber)" href="/articles/">📚 সব আর্টিকেল</a></p>'
+ '</main>' + footer())
+with io.open(os.path.join(ROOT,'404.html'),'w',encoding='utf-8') as f: f.write(nf)
+print('✓ 404.html')
+
 with io.open(os.path.join(ROOT,'robots.txt'),'w',encoding='utf-8') as f: f.write(f'User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: {DOMAIN}/sitemap.xml\n')
 # RSS feed (published articles, newest scheduled-date first)
 def rss_date(a):
