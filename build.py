@@ -161,7 +161,17 @@ for s,c in CATS.items():
 
 # ---------- homepage ----------
 cat_cards = ''.join(f'''<a href="/{s}/" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 22px;text-decoration:none;display:block"><div style="width:52px;height:52px;border-radius:12px;background:var(--teal-lite);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px">{c['emoji']}</div><h3 style="font-family:var(--font-head);font-size:18px;color:var(--text-main);margin-bottom:8px">{c['name']}</h3><p style="font-size:13px;color:var(--text-mute);line-height:1.75;margin-bottom:12px">{c['desc']}</p><span style="font-size:12px;color:var(--teal);font-weight:600">{bn(len(by_cat(s)))}টি আর্টিকেল →</span></a>''' for s,c in CATS.items())
-feat = ''.join(f'''<a href="/{a['cat']}/{a['slug']}/" class="cat-img-card"><div class="cat-img-card-img"><img src="/images/articles/{a['cat']}/{a['slug']}.jpg" alt="{a['alt']}" loading="lazy" onerror="this.style.display='none'"></div><div class="cat-img-card-body"><div class="cat-img-card-meta"><span class="cat-img-card-tag">{CATS[a['cat']]['name']}</span><span class="cat-img-card-time">{a['minutes']} মিনিট</span></div><div class="cat-img-card-title">{a['title']}</div><p class="cat-img-card-excerpt">{a['excerpt'][:110]}…</p></div></a>''' for a in ARTICLES[:6])
+_feat_pick, _feat_seen_cats = [], set()
+for a in sorted(ARTICLES, key=lambda x: x.get('publishAt', ''), reverse=True):
+    if a['cat'] not in _feat_seen_cats or len(_feat_pick) >= len(CATS):
+        _feat_pick.append(a); _feat_seen_cats.add(a['cat'])
+    if len(_feat_pick) == 6: break
+if len(_feat_pick) < 6:
+    for a in sorted(ARTICLES, key=lambda x: x.get('publishAt', ''), reverse=True):
+        if a not in _feat_pick:
+            _feat_pick.append(a)
+        if len(_feat_pick) == 6: break
+feat = ''.join(f'''<a href="/{a['cat']}/{a['slug']}/" class="cat-img-card"><div class="cat-img-card-img"><img src="/images/articles/{a['cat']}/{a['slug']}.jpg" alt="{a['alt']}" loading="lazy" onerror="this.style.display='none'"></div><div class="cat-img-card-body"><div class="cat-img-card-meta"><span class="cat-img-card-tag">{CATS[a['cat']]['name']}</span><span class="cat-img-card-time">{a['minutes']} মিনিট</span></div><div class="cat-img-card-title">{a['title']}</div><p class="cat-img-card-excerpt">{a['excerpt'][:110]}…</p></div></a>''' for a in _feat_pick)
 home_faq = [
  ('আমার সঠিক ব্রা সাইজ কীভাবে জানবো?','একটি মাপার ফিতা দিয়ে বাসায়ই ব্যান্ড ও বাস্ট মেপে সাইজ বের করা যায়। আমাদের সাইজ মাপার গাইডে ধাপে ধাপে পদ্ধতি দেওয়া আছে।'),
  ('কত দিন পর পর ব্রা বদলানো উচিত?','নিয়মিত ব্যবহারে সাধারণত ৬–১২ মাস পর ব্রার ইলাস্টিক দুর্বল হয়ে যায়। ফিটিং ঠিক না থাকলে আগেই বদলানো ভালো।'),
