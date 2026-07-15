@@ -70,11 +70,12 @@ GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="
 
 def head(title, desc, path, ogtype='website', schema='', ogimage=''):
     url = DOMAIN + path
-    og = f'<meta property="og:image" content="{DOMAIN}{ogimage}">\n' if ogimage else ''
+    og = f'<meta property="og:image" content="{DOMAIN}{ogimage}">\n<meta name="twitter:image" content="{DOMAIN}{ogimage}">\n' if ogimage else ''
     return ('<!DOCTYPE html>\n<html lang="bn">\n<head>\n<meta charset="UTF-8">\n'
     f'{GA_SNIPPET}\n'
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
     f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
+    f'<meta name="author" content="{AUTHOR}">\n<meta name="theme-color" content="#8B2A5B">\n'
     f'<link rel="canonical" href="{url}">\n'
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n'
     f'<link rel="alternate" type="application/rss+xml" title="{SITE}" href="/feed.xml">\n'
@@ -82,6 +83,7 @@ def head(title, desc, path, ogtype='website', schema='', ogimage=''):
     f'<meta property="og:url" content="{url}">\n<meta property="og:type" content="{ogtype}">\n'
     f'<meta property="og:site_name" content="{SITE}">\n'
     f'<meta property="og:locale" content="bn_BD">\n{og}<meta name="twitter:card" content="summary_large_image">\n'
+    f'<meta name="twitter:title" content="{title}">\n<meta name="twitter:description" content="{desc}">\n'
     f'{GFONTS}\n<link rel="stylesheet" href="/shared.css">\n{schema}\n</head>\n<body>\n')
 
 def nav(active=''):
@@ -123,7 +125,7 @@ for a in ARTICLES:
       "@context":"https://schema.org","@type":"Article","headline":a['title'],"description":a['desc'],
       "inLanguage":"bn","author":{"@type":"Person","name":AUTHOR,"url":DOMAIN+"/about/"},
       "publisher":{"@type":"Organization","name":SITE,"url":DOMAIN+"/"},
-      "datePublished":"2026-06-15","dateModified":"2026-07-10",
+      "datePublished":a.get('publishAt') or TODAY,"dateModified":a.get('updatedAt') or a.get('publishAt') or TODAY,
       "mainEntityOfPage":{"@type":"WebPage","@id":DOMAIN+path}},ensure_ascii=False)+'</script>')
     schema += '<script type="application/ld+json">'+json.dumps({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
       {"@type":"ListItem","position":1,"name":"হোম","item":DOMAIN+"/"},
