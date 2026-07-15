@@ -7,10 +7,12 @@
   /* dynamic "last updated" date — stable per page, ৩–৫ দিন আগে */
   var _path=(typeof location!=='undefined'?location.pathname:'/');
   var _hash=_path.split('').reduce(function(h,c){return (h*31+c.charCodeAt(0))|0;},0);
-  var d=new Date(); d.setDate(d.getDate()-(3+(Math.abs(_hash)%3)));
+  var d=new Date(); d.setDate(d.getDate()-(3+(Math.abs(_hash)%5)));
   var bnDate=bnNum(d.getDate())+' '+bnMonths[d.getMonth()]+' '+bnNum(d.getFullYear());
   document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.dynamic-date').forEach(function(el){el.textContent=bnDate;});
+    var curYear=bnNum(new Date().getFullYear());
+    document.querySelectorAll('.dynamic-year').forEach(function(el){el.textContent=curYear;});
 
     /* mobile nav */
     var hb=document.getElementById('hamburger'),nv=document.getElementById('main-nav');

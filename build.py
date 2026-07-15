@@ -6,7 +6,6 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'site')
 CONTENT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content')
 DOMAIN = 'https://bra.bd'
 SITE = 'ব্রা বাংলাদেশ'
-YEAR = '২০২৬'
 AUTHOR = 'সাবরিনা হক'
 AUTHOR_TITLE = 'ফ্যাশন ও ইনারওয়্যার বিষয়ক লেখক'
 
@@ -27,6 +26,7 @@ SCHEDULED = [a for a in ALL_ARTICLES if a.get('publishAt', '') > TODAY]
 def by_cat(c): return [a for a in ARTICLES if a['cat']==c]
 BN='০১২৩৪৫৬৭৮৯'
 def bn(n): return ''.join(BN[int(d)] for d in str(n))
+YEAR = bn(date.today().year)
 
 # ---------- seeded comments: content/seed-comments.json থেকে (এডমিন এডিটরে এডিটযোগ্য) ----------
 with io.open(os.path.join(CONTENT,'seed-comments.json'),encoding='utf-8') as f:
@@ -102,7 +102,7 @@ def footer():
     f'<div class="footer-logo"><div class="footer-logo-paw">🎀</div>{SITE}</div>'
     '<p class="footer-desc">বাংলা ভাষায় ব্রা ও ইনারওয়্যার বিষয়ক নির্ভরযোগ্য তথ্যের ঠিকানা। সাইজ, ফিটিং, যত্ন ও স্বাস্থ্য — সব প্রশ্নের সহজ উত্তর, নারীদের জন্য, বাংলায়।</p></div>'
     + cols + '</div><div class="footer-bottom">'
-    f'<span>&copy; {YEAR} bra.bd — সর্বস্বত্ব সংরক্ষিত</span>'
+    f'<span>&copy; <span class="dynamic-year">{YEAR}</span> bra.bd — সর্বস্বত্ব সংরক্ষিত</span>'
     '<div class="footer-bottom-links"><a href="/privacy-policy/">প্রাইভেসি</a><a href="/terms-of-service/">শর্তাবলী</a>'
     '<a href="/disclaimer/">দাবিত্যাগ</a><a href="/contact/">যোগাযোগ</a><a href="/sitemap.xml">সাইটম্যাপ</a></div>'
     '</div></footer>\n<script src="/sb.js"></script>\n<script src="/shared.js"></script>\n<script src="/ads.js"></script>\n</body>\n</html>')
@@ -185,7 +185,7 @@ html = (head(f'{SITE} — ব্রা সাইজ, ফিটিং ও যত�
 <div><strong style="color:var(--teal);font-size:20px">{bn(len(ARTICLES))}+</strong> বিস্তারিত গাইড</div>
 <div><strong style="color:var(--teal);font-size:20px">{bn(len(CATS))}টি</strong> বিষয়ভিত্তিক বিভাগ</div>
 <div><strong style="color:var(--teal);font-size:20px">১০০%</strong> বাংলায়</div>
-<div><strong style="color:var(--teal);font-size:20px">{YEAR}</strong> হালনাগাদ তথ্য</div>
+<div><strong style="color:var(--teal);font-size:20px" class="dynamic-year">{YEAR}</strong> হালনাগাদ তথ্য</div>
 </div></div>
 <section style="max-width:1100px;margin:0 auto;padding:64px 24px">
 <div style="text-align:center;margin-bottom:36px"><h2 style="font-family:var(--font-head);font-size:28px;color:var(--text-main)">যা জানতে চান, সব এখানে</h2><p style="color:var(--text-mute)">চারটি বিভাগে সাজানো আমাদের টপিক্যাল গাইড</p></div>
