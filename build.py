@@ -236,11 +236,11 @@ arch_html = (head(f'সব আর্টিকেল — {SITE}', f'{SITE}-এর
 write('/articles/', arch_html)
 
 # ---------- sitemap & robots ----------
-urls = [('/','weekly','1.0')] + [(f'/{s}/','weekly','0.8') for s in CATS] + \
- [(f'/{a["cat"]}/{a["slug"]}/','monthly','0.7') for a in ARTICLES] + \
- [('/articles/','weekly','0.6'),('/glossary/','monthly','0.6'),('/calculator/','monthly','0.8'),('/about/','yearly','0.5'),('/contact/','yearly','0.4'),('/privacy-policy/','yearly','0.2'),('/terms-of-service/','yearly','0.2'),('/disclaimer/','yearly','0.2')]
+urls = [('/','weekly','1.0',TODAY)] + [(f'/{s}/','weekly','0.8',TODAY) for s in CATS] + \
+ [(f'/{a["cat"]}/{a["slug"]}/','monthly','0.7',a.get('publishAt') or TODAY) for a in ARTICLES] + \
+ [('/articles/','weekly','0.6',TODAY),('/glossary/','monthly','0.6',TODAY),('/calculator/','monthly','0.8',TODAY),('/about/','yearly','0.5',TODAY),('/contact/','yearly','0.4',TODAY),('/privacy-policy/','yearly','0.2',TODAY),('/terms-of-service/','yearly','0.2',TODAY),('/disclaimer/','yearly','0.2',TODAY)]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-for u,cf,pr in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
+for u,cf,pr,lm in urls: sm += f'  <url><loc>{DOMAIN}{u}</loc><lastmod>{lm}</lastmod><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
 sm += '</urlset>\n'
 with io.open(os.path.join(ROOT,'sitemap.xml'),'w',encoding='utf-8') as f: f.write(sm)
 # ---------- 404 ----------

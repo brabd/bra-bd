@@ -5,8 +5,13 @@ on:
     branches: [main]
     paths: ['content/**', 'build.py']
   schedule:
-    - cron: '15 3 * * *'   # প্রতিদিন 03:15 UTC = সকাল ৯:১৫ বাংলাদেশ সময়
+    - cron: '15 3 * * *'   # প্রধান রান — প্রতিদিন 03:15 UTC = সকাল ৯:১৫ বাংলাদেশ সময়
+    - cron: '15 4 * * *'   # ব্যাকআপ রান — GitHub-এর cron মাঝেমধ্যে মিস/দেরি করে; ১ ঘণ্টা পর একই কাজ আবার চেষ্টা করে (কিছু নতুন না থাকলে কমিট হয় না)
   workflow_dispatch:
+
+concurrency:
+  group: daily-build
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -30,7 +35,10 @@ jobs:
             echo "No changes to publish"
           else
             git commit -m "auto-build: publish due articles [skip ci]"
-            git push
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && break
+              echo "push failed, retrying ($i)..."; sleep 5
+            done
           fi
       - name: IndexNow ping
         run: python ping_indexnow.py
