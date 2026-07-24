@@ -189,12 +189,6 @@ html = (head(f'{SITE} — ব্রা সাইজ, ফিটিং ও যত�
 <a href="/size-fitting/bra-size-measurement-guide/" style="background:var(--amber);color:white;padding:12px 26px;border-radius:8px;text-decoration:none;font-weight:600">সাইজ মাপা শুরু করুন</a>
 <a href="/about/" style="background:rgba(255,255,255,.12);color:white;padding:12px 26px;border-radius:8px;text-decoration:none;font-weight:600;border:1px solid rgba(255,255,255,.3)">আমাদের সম্পর্কে</a>
 </div></div></div>
-<div style="background:var(--white);border-bottom:1px solid var(--border)"><div style="max-width:1100px;margin:0 auto;padding:20px 24px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--text-mute)">
-<div><strong style="color:var(--teal);font-size:20px">{bn(len(ARTICLES))}+</strong> বিস্তারিত গাইড</div>
-<div><strong style="color:var(--teal);font-size:20px">{bn(len(CATS))}টি</strong> বিষয়ভিত্তিক বিভাগ</div>
-<div><strong style="color:var(--teal);font-size:20px">১০০%</strong> বাংলায়</div>
-<div><strong style="color:var(--teal);font-size:20px" class="dynamic-year">{YEAR}</strong> হালনাগাদ তথ্য</div>
-</div></div>
 <section style="max-width:1100px;margin:0 auto;padding:64px 24px">
 <div style="text-align:center;margin-bottom:36px"><h2 style="font-family:var(--font-head);font-size:28px;color:var(--text-main)">যা জানতে চান, সব এখানে</h2><p style="color:var(--text-mute)">চারটি বিভাগে সাজানো আমাদের টপিক্যাল গাইড</p></div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px">{cat_cards}</div>
