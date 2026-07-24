@@ -44,10 +44,12 @@ th{color:var(--text-mute);font-size:12px}
 </div>
 
 <div class="pane active" id="pane-overview">
-<div class="adm-card"><h3>সাইট পরিসংখ্যান (সর্বশেষ ৬ মাস)</h3>
+<p class="note" id="ov-src-warning" style="background:#fff8e6;border:1px solid #f0d78c;border-radius:8px;padding:10px 14px;margin-bottom:16px">⚠️ যতক্ষণ না Supabase কানেক্ট করা আছে, এই পুরো পেজের সংখ্যা শুধু <b>এই ব্রাউজারে আপনার নিজের ভিজিট</b> থেকে হিসাব হয় — প্রকৃত সব ভিজিটরের ডেটা না। "অভ্যন্তরীণ" মানে সাইটের ভিতরেই এক পেজ থেকে আরেক পেজে যাওয়া (গুগল/ফেসবুক থেকে না)। Supabase কানেক্ট থাকলে এই সতর্কতা চলে যাবে ও সব ভিজিটরের কেন্দ্রীয় ডেটা দেখাবে।</p>
+<div class="adm-card"><h3>সাইট পরিসংখ্যান (দৈনিক · সাপ্তাহিক · মাসিক · বাৎসরিক)</h3>
 <div class="adm-grid" id="ov-tiles"></div>
 </div>
-<div class="adm-card"><h3>ট্রাফিক সোর্স</h3><table id="ov-sources"><tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr></table></div>
+<div class="adm-card"><h3>ট্রাফিক সোর্স</h3><table id="ov-sources"><tr><th>সোর্স</th><th>ভিজিট</th><th></th></tr></table>
+<p class="note">📌 "অভ্যন্তরীণ" = ভিজিটর সাইটেরই এক পেজ থেকে আরেক পেজে ক্লিক করে গেছেন (রেফারার = bra.bd)।</p></div>
 <div class="adm-card"><h3>সর্বাধিক পঠিত পেজ</h3><table id="ov-pages"><tr><th>পেজ</th><th>ভিউ</th></tr></table>
 <div id="ov-pages-nav" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px"></div></div>
 <div class="adm-card"><h3>দৈনিক ভিউ (শেষ ১৪ দিন)</h3><div id="ov-daily" style="display:flex;gap:5px;height:150px"></div></div>
@@ -180,11 +182,18 @@ var trend=p7?Math.round((t7-p7)/p7*100):(t7?100:0);
 var trendTxt=(trend>=0?'▲':'▼')+' '+bn(Math.abs(trend))+'%';
 var topSrc='—',mxT=0;Object.keys(o.srcs).forEach(function(s){if(o.srcs[s]>mxT){mxT=o.srcs[s];topSrc=s;}});
 var totS=0;Object.keys(o.srcs).forEach(function(s){totS+=o.srcs[s];});
+/* মাসিক ও বাৎসরিক টোটাল — byDay-এর পুরো ইতিহাস থেকে */
+var nowD=new Date(),curMonth=nowD.toISOString().slice(0,7),curYear=nowD.toISOString().slice(0,4),monthTotal=0,yearTotal=0;
+Object.keys(o.byDay).forEach(function(d){
+if(d.slice(0,7)===curMonth)monthTotal+=o.byDay[d];
+if(d.slice(0,4)===curYear)yearTotal+=o.byDay[d];});
 document.getElementById('ov-tiles').innerHTML=
- tile(bn(o.total),'মোট পেজভিউ')+
- tile(bn(o.today),'আজকের ভিউ')+
- tile(bn(t7),'গত ৭ দিন')+
- tile('<span style="color:'+(trend>=0?'#2a7a2a':'#c0392b')+'">'+trendTxt+'</span>','আগের ৭ দিনের তুলনায়')+
+ tile(bn(o.today),'দৈনিক (আজ)')+
+ tile(bn(t7),'সাপ্তাহিক (৭ দিন)')+
+ tile(bn(monthTotal),'মাসিক (এই মাস)')+
+ tile(bn(yearTotal),'বাৎসরিক (এই বছর)')+
+ tile(bn(o.total),'মোট পেজভিউ (সংরক্ষিত সময়কাল)')+
+ tile('<span style="color:'+(trend>=0?'#2a7a2a':'#c0392b')+'">'+trendTxt+'</span>','সাপ্তাহিক ট্রেন্ড (আগের ৭ দিনের তুলনায়)')+
  tile(bn(o.days),'সক্রিয় দিন')+
  tile(topSrc,'শীর্ষ সোর্স')+
  tile('…','প্রকাশিত আর্টিকেল');
@@ -255,6 +264,7 @@ rows.forEach(function(r){s2[r.source]=(s2[r.source]||0)+1;p2[r.path]=(p2[r.path]
 var today2=new Date().toISOString().slice(0,10);
 renderStats({total:rows.length,today:d2[today2]||0,days:Object.keys(d2).length,srcs:s2,pages:p2,byDay:d2,devices:devices});
 var lb=document.getElementById('ov-src-label');if(lb)lb.textContent='Supabase কেন্দ্রীয় (সব ভিজিটর) — ডিভাইস টেবিলটি লোকাল';
+var wn=document.getElementById('ov-src-warning');if(wn)wn.style.display='none';
 }).catch(function(){});
 BB_SB.get('ad_events?select=slot,kind&limit=10000').then(function(rows){
 if(!rows||!rows.length)return;
