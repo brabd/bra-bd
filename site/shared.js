@@ -92,7 +92,7 @@
     stats[day].sources[src]=(stats[day].sources[src]||0)+1;
     var dev=/Mobi|Android|iPhone/i.test(navigator.userAgent)?'মোবাইল':(/iPad|Tablet/i.test(navigator.userAgent)?'ট্যাবলেট':'ডেস্কটপ');
     stats[day].devices[dev]=(stats[day].devices[dev]||0)+1;
-    var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-6);
+    var cutoff=new Date();cutoff.setMonth(cutoff.getMonth()-14);
     Object.keys(stats).forEach(function(k){if(new Date(k)<cutoff)delete stats[k];});
     localStorage.setItem('bb_stats',JSON.stringify(stats));
     if(window.BB_SB&&location.pathname.indexOf('/admin')!==0){
