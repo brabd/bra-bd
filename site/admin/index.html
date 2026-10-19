@@ -38,6 +38,7 @@ th{color:var(--text-mute);font-size:12px}
 <button class="adm-tab active" data-pane="overview">📊 ওভারভিউ</button>
 <button class="adm-tab" data-pane="ads">📢 অ্যাডস ম্যানেজার</button>
 <button class="adm-tab" data-pane="seo">🔍 SEO ও ভেরিফিকেশন</button>
+<button class="adm-tab" data-pane="adsense">💰 AdSense</button>
 <button class="adm-tab" data-pane="content">📝 কনটেন্ট</button>
 <button class="adm-tab" data-pane="comments">💬 কমেন্ট</button>
 <button class="adm-tab" data-pane="editor">✏️ এডিটর</button>
@@ -89,6 +90,42 @@ th{color:var(--text-mute);font-size:12px}
 <tr><td>✅ Schema markup</td><td>Article, FAQPage, WebSite, Organization</td></tr>
 <tr><td>✅ Canonical, OG ট্যাগ</td><td>সব পেজে</td></tr></table>
 <p class="note">সাইট লাইভ হওয়ার পর Search Console-এ গিয়ে sitemap সাবমিট করুন: https://bra.bd/sitemap.xml</p></div>
+</div>
+
+<div class="pane" id="pane-adsense">
+<div class="adm-card"><h3>💰 Google AdSense — অটো কোড ও সাইট ভেরিফিকেশন</h3>
+<p class="note" style="margin-top:0">আপনার AdSense Publisher ID (বা AdSense-এর দেওয়া পুরো কোড/ads.txt লাইন) পেস্ট করুন। "অটো-যুক্ত করুন" চাপলে সব পেজের <code>&lt;head&gt;</code>-এ AdSense কোড + <code>google-adsense-account</code> মেটা ট্যাগ বসবে এবং <code>/ads.txt</code> তৈরি হবে — ফলে AdSense-এ সাইট ভেরিফাই করা যাবে।</p>
+<label>Publisher ID অথবা AdSense কোড পেস্ট করুন</label>
+<textarea id="as-input" rows="3" placeholder="ca-pub-1234567890123456  — অথবা AdSense-এর পুরো &lt;script&gt; কোড"></textarea>
+<p class="note" id="as-detect"></p>
+<label>GitHub Personal Access Token (repo স্কোপ) — এডিটর ট্যাবের টোকেনই ব্যবহার হয়, শুধু এই ব্রাউজারে সংরক্ষিত</label>
+<input type="password" id="as-token" placeholder="ghp_… বা github_pat_…">
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button class="btn" id="as-apply" onclick="asApply()">⚡ অটো-যুক্ত করুন</button>
+<button class="btn gray" onclick="asCheck()">🔎 ভেরিফাই চেক</button>
+<button class="btn gray" onclick="asRemove()" style="background:#b03a3a">🗑 AdSense কোড সরান</button>
+</div>
+<p class="ok-msg" id="as-ok"></p>
+<p class="note" id="as-err" style="color:#c0392b"></p>
+</div>
+<div class="adm-card"><h3>যে কোড সাইটে বসবে (প্রিভিউ)</h3>
+<label>&lt;head&gt;-এ (সব পেজে)</label><textarea id="as-pv-head" rows="4" readonly></textarea>
+<label>/ads.txt</label><textarea id="as-pv-ads" rows="1" readonly></textarea>
+</div>
+<div class="adm-card"><h3>লাইভ ভেরিফিকেশন স্ট্যাটাস</h3>
+<table id="as-status"><tr><th>চেক</th><th>ফলাফল</th></tr></table>
+<p class="note" id="as-poll"></p>
+</div>
+<div class="adm-card"><h3>AdSense-এ সাইট অ্যাপ্লাই করার ধাপ</h3>
+<ol style="padding-left:20px;line-height:1.9;font-size:14px">
+<li>উপরে Publisher ID দিয়ে <b>অটো-যুক্ত করুন</b> চাপুন (১–৩ মিনিটে বিল্ড ও ডিপ্লয় হবে)।</li>
+<li><b>ভেরিফাই চেক</b> চালিয়ে সব সারি ✅ হওয়া পর্যন্ত অপেক্ষা করুন।</li>
+<li><a href="https://adsense.google.com/adsense/new/u/0/sites" target="_blank" rel="noopener">AdSense → Sites</a>-এ গিয়ে <code>bra.bd</code> যোগ করুন।</li>
+<li>ভেরিফাই পদ্ধতি হিসেবে <b>AdSense code snippet</b> বা <b>Meta tag</b> বেছে "Verify" চাপুন — কোড আগে থেকেই সাইটে আছে।</li>
+<li>রিভিউ শেষ হতে সাধারণত কয়েক দিন থেকে ২ সপ্তাহ লাগে; অনুমোদনের পর <b>অ্যাডস ম্যানেজার</b> ট্যাবে স্লটের টাইপ "AdSense" করুন।</li>
+</ol>
+<p class="note">📌 কোডটি সবসময় লোড হয় (ভেরিফিকেশনের জন্য এটাই দরকার)। বিজ্ঞাপন দেখানো ও কুকি-সম্মতি আগের মতোই অ্যাডস ম্যানেজার ও কুকি ব্যানার নিয়ন্ত্রণ করে।</p>
+</div>
 </div>
 
 <div class="pane" id="pane-content">
@@ -305,6 +342,76 @@ var n=(x.match(/<loc>/g)||[]).length;row('সাইটম্যাপ',n>10,n+'�
 fetch('/robots.txt').then(function(r){return r.text();}).then(function(x){row('robots.txt',/Sitemap:/.test(x));});
 fetch('/feed.xml').then(function(r){return r.ok;}).then(function(ok){row('RSS ফিড',ok);});
 }
+
+
+/* ---------- AdSense অটো কোড ও ভেরিফাই ---------- */
+function asExtract(v){var m=String(v||'').match(/pub-(\d{16})/);return m?'ca-pub-'+m[1]:'';}
+function asHdr(){var t=document.getElementById('as-token').value.trim();if(t)localStorage.setItem('bb_gh_token',t);
+var k=localStorage.getItem('bb_gh_token');return k?{Authorization:'Bearer '+k,'Accept':'application/vnd.github+json'}:null;}
+function asPreview(){
+var id=asExtract(document.getElementById('as-input').value);
+document.getElementById('as-detect').textContent=document.getElementById('as-input').value.trim()?(id?'✓ শনাক্ত হয়েছে: '+id:'✗ বৈধ Publisher ID পাওয়া যায়নি (ca-pub- এর পর ১৬ সংখ্যা)'):'';
+document.getElementById('as-pv-head').value=id?'<meta name="google-adsense-account" content="'+id+'">\n<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+id+'" crossorigin="anonymous"><\/script>':'';
+document.getElementById('as-pv-ads').value=id?'google.com, '+id.slice(3)+', DIRECT, f08c47fec0942fa0':'';}
+function asPut(path,content,msg,hdr){
+var u='https://api.github.com/repos/brabd/bra-bd/contents/'+path;
+return fetch(u+'?ref=main&_='+Date.now(),{headers:hdr}).then(function(r){return r.status===404?{}:r.json();}).then(function(f){
+var sha=f&&f.sha;
+if(content===null){if(!sha)return null;return fetch(u,{method:'DELETE',headers:hdr,body:JSON.stringify({message:msg,sha:sha,branch:'main'})}).then(function(r){if(!r.ok)throw new Error(path+' → HTTP '+r.status);});}
+var b={message:msg,content:b64enc(content),branch:'main'};if(sha)b.sha=sha;
+return fetch(u,{method:'PUT',headers:hdr,body:JSON.stringify(b)}).then(function(r){if(!r.ok)throw new Error(path+' → HTTP '+r.status+(r.status===401||r.status===403||r.status===404?' (টোকেন/repo স্কোপ দেখুন)':''));});});}
+function asBusy(on){document.getElementById('as-apply').disabled=on;document.getElementById('as-apply').style.opacity=on?.5:1;}
+function asSyncCfg(id){try{var c=JSON.parse(localStorage.getItem('bb_site_config')||'{}');c.adsense=id;localStorage.setItem('bb_site_config',JSON.stringify(c));
+var f=document.getElementById('cfg-adsense');if(f)f.value=id;
+if(window.BB_SB)BB_SB.upsert('site_config',[{key:'adsense',value:id}]).catch(function(){});}catch(e){}}
+function asApply(){
+var id=asExtract(document.getElementById('as-input').value),err=document.getElementById('as-err'),ok=document.getElementById('as-ok');
+ok.style.display='none';err.textContent='';
+if(!id){err.textContent='বৈধ Publisher ID দিন (ca-pub-1234567890123456)';return;}
+var h=asHdr();if(!h){err.textContent='GitHub টোকেন দিন';return;}
+asBusy(true);
+asPut('content/adsense.json',JSON.stringify({publisher:id},null,2)+'\n','adsense: publisher ID সেট ('+id+')',h)
+.then(function(){return asPut('site/ads.txt','google.com, '+id.slice(3)+', DIRECT, f08c47fec0942fa0\n','adsense: ads.txt',h);})
+.then(function(){asSyncCfg(id);ok.textContent='✓ কমিট হয়েছে — অটো-বিল্ড চলছে। ১–৩ মিনিটে সব পেজে কোড বসবে; নিচে স্ট্যাটাস নিজে থেকে আপডেট হবে।';ok.style.display='block';asBusy(false);asPoll(id,15);})
+.catch(function(e){err.textContent='ব্যর্থ: '+e.message;asBusy(false);});}
+function asRemove(){
+if(!confirm('সব পেজ থেকে AdSense কোড ও ads.txt সরানো হবে। নিশ্চিত?'))return;
+var err=document.getElementById('as-err'),ok=document.getElementById('as-ok');ok.style.display='none';err.textContent='';
+var h=asHdr();if(!h){err.textContent='GitHub টোকেন দিন';return;}
+asPut('content/adsense.json',JSON.stringify({publisher:''},null,2)+'\n','adsense: কোড সরানো',h)
+.then(function(){return asPut('site/ads.txt',null,'adsense: ads.txt সরানো',h);})
+.then(function(){asSyncCfg('');ok.textContent='✓ সরানো হয়েছে — অটো-বিল্ড শেষ হলে সব পেজ থেকে কোড চলে যাবে।';ok.style.display='block';})
+.catch(function(e){err.textContent='ব্যর্থ: '+e.message;});}
+function asCheck(expect){
+var id=expect||asExtract(document.getElementById('as-input').value),t=document.getElementById('as-status');
+t.innerHTML='<tr><th>চেক</th><th>ফলাফল</th></tr>';
+function row(n,v,d){t.innerHTML+='<tr><td>'+n+'</td><td>'+(v?'✅ ':'❌ ')+(d||'')+'</td></tr>';}
+if(!id){t.innerHTML+='<tr><td colspan="2" style="color:var(--text-mute)">আগে Publisher ID দিন</td></tr>';return Promise.resolve(false);}
+var nc={cache:'no-store'};
+function page(u){return fetch(u+(u.indexOf('?')<0?'?':'&')+'_='+Date.now(),nc).then(function(r){return r.text();}).catch(function(){return '';});}
+function hasAll(html){return html.indexOf('adsbygoogle.js?client='+id)>-1;}
+function hasMeta(html){return html.indexOf('name="google-adsense-account" content="'+id+'"')>-1;}
+return fetch('/admin/queue.json',nc).then(function(r){return r.json();}).catch(function(){return [];}).then(function(q){
+var pub=q.filter(function(x){return x.status==='published';})[0];
+var art=pub?'/'+pub.cat+'/'+pub.slug+'/':'/about/';
+return Promise.all([page('/'),page(art),page('/ads.txt'),page('/robots.txt')]).then(function(r){
+var line='google.com, '+id.slice(3)+', DIRECT, f08c47fec0942fa0';
+var a=hasAll(r[0])&&hasAll(r[1]),m=hasMeta(r[0])&&hasMeta(r[1]),x=r[2].indexOf(line)>-1,ro=!/Disallow:\s*\/\s*$/m.test(r[3]);
+row('AdSense কোড (হোম + আর্টিকেল পেজ <head>)',a,a?'পাওয়া গেছে':'এখনো নেই — বিল্ড শেষ হয়নি');
+row('google-adsense-account মেটা ট্যাগ',m,m?'পাওয়া গেছে':'এখনো নেই');
+row('/ads.txt',x,x?line:'এখনো নেই');
+row('robots.txt ক্রলারকে আটকাচ্ছে না',ro);
+return a&&m&&x&&ro;});});}
+var asTimer=null;
+function asPoll(id,left){clearTimeout(asTimer);var p=document.getElementById('as-poll');
+asCheck(id).then(function(done){
+if(done){p.textContent='✅ সব ঠিক আছে — এখন AdSense-এ গিয়ে Verify করুন।';return;}
+if(left<=0){p.textContent='এখনো আপডেট হয়নি — GitHub → Actions ট্যাবে বিল্ড চেক করুন, তারপর "ভেরিফাই চেক" আবার চাপুন।';return;}
+p.textContent='⏳ ডিপ্লয়ের অপেক্ষায়… (নিজে থেকে আবার চেক হবে)';asTimer=setTimeout(function(){asPoll(id,left-1);},20000);});}
+document.getElementById('as-input').addEventListener('input',asPreview);
+(function(){var c={};try{c=JSON.parse(localStorage.getItem('bb_site_config')||'{}');}catch(e){}
+var i=document.getElementById('as-input');if(c.adsense){i.value=c.adsense;asPreview();}
+if(localStorage.getItem('bb_gh_token'))document.getElementById('as-token').placeholder='●●●● টোকেন সংরক্ষিত আছে';})();
 
 /* GitHub editor */
 var GH='https://api.github.com/repos/brabd/bra-bd/contents/';

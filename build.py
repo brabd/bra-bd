@@ -66,13 +66,33 @@ GA_SNIPPET = ('<script>window.dataLayer=window.dataLayer||[];function gtag(){dat
 f"gtag('js',new Date());gtag('config','{GA_ID}');</script>\n"
 f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>')
 
+# ---------- Google AdSense: content/adsense.json (এডমিন → 💰 AdSense ট্যাব থেকে সেট হয়) ----------
+# publisher থাকলে প্রতিটি পেজের <head>-এ অটো-কোড + google-adsense-account মেটা বসে এবং site/ads.txt তৈরি হয়।
+import re as _re
+ADSENSE_PUB = ''
+try:
+    with io.open(os.path.join(CONTENT,'adsense.json'),encoding='utf-8') as _f:
+        _m = _re.search(r'pub-(\d{16})', str(json.load(_f).get('publisher','')))
+        if _m: ADSENSE_PUB = 'ca-pub-' + _m.group(1)
+except Exception:
+    pass
+ADSENSE_HEAD = (f'<meta name="google-adsense-account" content="{ADSENSE_PUB}">\n'
+    f'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_PUB}" crossorigin="anonymous"></script>\n') if ADSENSE_PUB else ''
+_ads_txt = os.path.join(ROOT, 'ads.txt')
+if ADSENSE_PUB:
+    with io.open(_ads_txt,'w',encoding='utf-8') as _f:
+        _f.write(f'google.com, {ADSENSE_PUB[3:]}, DIRECT, f08c47fec0942fa0\n')
+    print('✓ ads.txt —', ADSENSE_PUB)
+elif os.path.exists(_ads_txt):
+    os.remove(_ads_txt)
+
 GFONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@700&display=swap" rel="stylesheet">'
 
 def head(title, desc, path, ogtype='website', schema='', ogimage=''):
     url = DOMAIN + path
     og = f'<meta property="og:image" content="{DOMAIN}{ogimage}">\n<meta name="twitter:image" content="{DOMAIN}{ogimage}">\n' if ogimage else ''
     return ('<!DOCTYPE html>\n<html lang="bn">\n<head>\n<meta charset="UTF-8">\n'
-    f'{GA_SNIPPET}\n'
+    f'{GA_SNIPPET}\n{ADSENSE_HEAD}'
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
     f'<title>{title}</title>\n<meta name="description" content="{desc}">\n'
     f'<meta name="author" content="{AUTHOR}">\n<meta name="theme-color" content="#8B2A5B">\n'

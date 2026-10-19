@@ -56,7 +56,7 @@
       window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};
       gtag('js',new Date());gtag('config',cfg.ga);
     }
-    if(cfg.adsense&&localStorage.getItem('bb_cookie_choice')==='all'){
+    if(cfg.adsense&&!document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')&&localStorage.getItem('bb_cookie_choice')==='all'){
       var a=document.createElement('script');a.async=true;a.crossOrigin='anonymous';
       a.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+cfg.adsense;
       document.head.appendChild(a);
